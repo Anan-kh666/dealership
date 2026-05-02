@@ -112,6 +112,93 @@ Copy `.env.example` to `.env` and fill in:
 - **Conventional Commits** — final foundation commit is
   `chore: scaffold monorepo foundation`.
 
+## Design system
+
+The first design pass landed alongside the homepage. Aesthetic direction is
+"Editorial Premium" — Polestar.com meets Porsche.com — graphite + warm
+off-white surfaces with a single bronze accent.
+
+### Tokens — single source of truth
+
+- `packages/ui/src/tokens.ts` exports tokens for non-CSS consumers (Framer
+  Motion configs, server renderers).
+- `packages/config/src/tailwind-preset.css` mirrors them inside the Tailwind v4
+  `@theme` block. **If you change one side, change the other.**
+
+Tokens cover: brand colors (graphite, surface-warm, bronze accent + accent-deep),
+a 50–900 neutral scale, semantic success/warning/error, font families wired to
+`next/font` CSS variables, display letter-spacing of `-0.02em`, four shadow
+levels (`--shadow-1` through `--shadow-4`), radii (sm 6 / md 10 / lg 16 / xl 24),
+motion durations (quick 150ms, standard 250ms, reveal 400ms) and easings.
+
+We did not introduce new spacing stops — Tailwind v4's default 4px scale
+already covers the brief's 4 / 8 / 12 / 16 / 24 / 32 / 48 / 64 / 96 / 128 stops
+via `p-1` … `p-32`.
+
+### Components added in `packages/ui`
+
+Built alongside (not replacing) the existing shadcn primitives:
+
+- `components/container.tsx` — max-width 1440px with responsive horizontal
+  padding (16 / 24 / 48). Polymorphic `as` prop.
+- `components/section.tsx` — vertical rhythm wrapper. `variant` (default | warm
+  | dark) and `spacing` (tight | default | loose).
+- `components/brand-button.tsx` — `BrandButton` with editorial-premium variants
+  (primary, secondary, ghost-light, ghost-dark) and sm/md/lg sizes. Built on
+  Radix Slot, uses brand tokens directly. The shadcn `Button` is left
+  untouched — it remains the unstyled foundation.
+- `components/card.tsx` — base card + `CardHeader` / `CardTitle` /
+  `CardContent`. Optional `interactive` flag for hover-lift.
+- `components/model-card.tsx` — composition for the model lineup. Accepts the
+  image as a `ReactNode` slot (so apps pass `next/image`) and an optional
+  `linkComponent` (so apps pass `next/link`) — keeps the package
+  framework-agnostic.
+- `components/stock-card.tsx` — same pattern, with badge variants (`available`
+  / `in-transit` / `arriving-soon`).
+
+The `cn` import inside the new components drops the `.js` extension because
+Next.js webpack does not resolve it under `transpilePackages`. The existing
+shadcn primitives still use `.js` — leave them until they are actually
+imported by an app.
+
+### Homepage — `apps/web/src/app/(public)/page.tsx`
+
+Sections, top to bottom: `Hero` → `Lineup` → `FindMatch` → `AvailableNow` →
+`Financing` → `TrustStrip` → `BlogTeaser`. Footer is layout-level.
+
+Notable decisions:
+
+- **Header** is a Client Component (`apps/web/src/components/site-header.tsx`)
+  with a `scrollY > 80` listener that swaps it from transparent (over the
+  hero) to white-with-shadow (after scroll), shrinking from 80px to 64px. The
+  layout, footer, and all sections remain server-rendered.
+- **Header is `fixed`** (was `sticky`) so it can overlay the full-bleed hero.
+  Routes without a full-bleed hero need their own top padding — downstream
+  agents should add `pt-20` to their wrappers.
+- **Framer Motion** is used in three places, per the brief: hero text reveal
+  (staggered children, 80ms delay, 400ms duration), section reveals on scroll
+  (`apps/web/src/components/reveal.tsx` — opacity + 8px translate, viewport
+  `once: true`), and ModelCard hover (CSS-only, see component). Reduced motion
+  is respected via `useReducedMotion`.
+- **Carousels** (mobile lineup, desktop+mobile available-now) are CSS-only
+  using `snap-x snap-mandatory` + `overflow-x-auto`. The available-now row
+  uses `min-w-[calc((100%-72px)/4)]` on desktop so the fourth card peeks.
+- **Placeholder data** lives in `apps/web/src/data/placeholders.ts` —
+  `lineup`, `inStock`, `bodyTypes`, `blogPosts`, plus `HERO_IMAGE` and
+  `FINANCING_IMAGE`. Names ("Meridian", "Aurora", "Halcyon CX", "Lumen EV",
+  "Continental GT 2026") are fictional. Replace this file once the
+  models/stock agents seed the database.
+- **Image domain**: `images.unsplash.com` was added to
+  `apps/web/next.config.ts` `remotePatterns`.
+
+### New runtime dependencies
+
+- `framer-motion` — added to `apps/web` for hero reveal and scroll-triggered
+  section reveals.
+- `lucide-react` — added to `apps/web` directly (was previously only a
+  `packages/ui` dependency) so the icon imports inside app-level homepage
+  components don't reach across the workspace boundary at build time.
+
 ## Out of scope (handed to other agents)
 
 - Real page UIs beyond the placeholder homepage
