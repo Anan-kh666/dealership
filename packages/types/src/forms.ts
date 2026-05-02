@@ -5,8 +5,8 @@ import {
   FuelType,
   StockStatus,
   Transmission,
-} from "./enums";
-import { cuid, decimalString, email, phone } from "./primitives";
+} from "./enums.js";
+import { cuid, decimalString, email, phone } from "./primitives.js";
 
 /**
  * Filters for the inventory and model browsing pages. All fields are optional;

@@ -15,6 +15,19 @@ const config: NextConfig = {
     ],
   },
   typedRoutes: true,
+  // Workspace packages (e.g. @dealership/types) are authored as .ts but use
+  // explicit .js extensions on relative imports so they remain valid
+  // ECMAScript under apps/api's NodeNext module resolution. Webpack does not
+  // map .js → .ts by default, so we wire that here.
+  webpack: (cfg) => {
+    cfg.resolve = cfg.resolve ?? {};
+    cfg.resolve.extensionAlias = {
+      ...(cfg.resolve.extensionAlias ?? {}),
+      ".js": [".ts", ".tsx", ".js", ".jsx"],
+      ".mjs": [".mts", ".mjs"],
+    };
+    return cfg;
+  },
 };
 
 export default config;
