@@ -30,8 +30,8 @@ export const lineup: Model[] = [
     bodyType: "Family SUV",
     startingPrice: "RM 168,000",
     heroImage:
-      "https://images.unsplash.com/photo-1568844293986-ca9c5c1bc2e8?w=1600&q=85&auto=format&fit=crop",
-    alt: "Aurora SUV at golden hour beside a coastal road",
+      "https://images.unsplash.com/photo-1583870996815-55daf7122b08?w=1600&q=85&auto=format&fit=crop",
+    alt: "Aurora SUV in deep graphite, three-quarter view in a low-light gallery setting",
   },
   {
     slug: "halcyon-cx",
