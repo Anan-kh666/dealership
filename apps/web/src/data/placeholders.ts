@@ -1,66 +1,20 @@
 /**
- * Hardcoded placeholder content for the homepage. Replaced once the
- * models/stock data agents seed the database.
+ * Hardcoded placeholder content for the homepage. Replaced as feature data
+ * lands in the database.
+ *
+ * Already replaced:
+ * - `lineup` / `Model` — the homepage Lineup section now reads from
+ *   `prisma.model` (see seed at `packages/db/prisma/seed.ts`).
+ *
+ * Still placeholder until the relevant feature agent ships:
+ * - `inStock` / `StockUnit` — the Available Now homepage row. The
+ *   stock-data agent will replace this with `StockUnit` rows.
+ * - `bodyTypes` — homepage filter shortcuts (display-only).
+ * - `blogPosts` / `BlogPost` — the blog teaser row.
+ * - `HERO_IMAGE`, `FINANCING_IMAGE` — section background imagery.
  *
  * Names imply but do not infringe — pure fiction.
  */
-
-export type Model = {
-  slug: string;
-  name: string;
-  bodyType: string;
-  startingPrice: string;
-  heroImage: string;
-  alt: string;
-};
-
-export const lineup: Model[] = [
-  {
-    slug: "meridian-1-5",
-    name: "Meridian 1.5",
-    bodyType: "Sedan",
-    startingPrice: "RM 96,800",
-    heroImage:
-      "https://images.unsplash.com/photo-1606664515524-ed2f786a0bd6?w=1600&q=85&auto=format&fit=crop",
-    alt: "Meridian 1.5 sedan in graphite, three-quarter front view",
-  },
-  {
-    slug: "aurora-suv",
-    name: "Aurora SUV",
-    bodyType: "Family SUV",
-    startingPrice: "RM 168,000",
-    heroImage:
-      "https://images.unsplash.com/photo-1583870996815-55daf7122b08?w=1600&q=85&auto=format&fit=crop",
-    alt: "Aurora SUV in deep graphite, three-quarter view in a low-light gallery setting",
-  },
-  {
-    slug: "halcyon-cx",
-    name: "Halcyon CX",
-    bodyType: "Crossover",
-    startingPrice: "RM 142,500",
-    heroImage:
-      "https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=1600&q=85&auto=format&fit=crop",
-    alt: "Halcyon CX crossover parked in a covered urban garage",
-  },
-  {
-    slug: "lumen-ev",
-    name: "Lumen EV",
-    bodyType: "Electric",
-    startingPrice: "RM 218,000",
-    heroImage:
-      "https://images.unsplash.com/photo-1617788138017-80ad40651399?w=1600&q=85&auto=format&fit=crop",
-    alt: "Lumen EV charging at a roadside station",
-  },
-  {
-    slug: "continental-gt-2026",
-    name: "Continental GT 2026",
-    bodyType: "Flagship",
-    startingPrice: "RM 488,000",
-    heroImage:
-      "https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=1600&q=85&auto=format&fit=crop",
-    alt: "Continental GT flagship coupe in a low-light studio setting",
-  },
-];
 
 export type StockUnit = {
   slug: string;

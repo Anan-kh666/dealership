@@ -6,6 +6,10 @@ import { Financing } from "@/components/home/financing";
 import { TrustStrip } from "@/components/home/trust-strip";
 import { BlogTeaser } from "@/components/home/blog-teaser";
 
+// Lineup queries Prisma directly; opt out of static rendering so build
+// doesn't require a live DATABASE_URL.
+export const dynamic = "force-dynamic";
+
 export default function HomePage(): React.ReactElement {
   return (
     <>

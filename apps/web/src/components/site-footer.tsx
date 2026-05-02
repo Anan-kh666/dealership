@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Container } from "@dealership/ui/components/container";
-import { lineup } from "@/data/placeholders";
+import { prisma } from "@dealership/db";
 
 const ABOUT = [
   { href: "/about", label: "Our Story" },
@@ -15,7 +15,18 @@ const SERVICES = [
   { href: "/after-sales", label: "After-Sales" },
 ];
 
-export function SiteFooter(): React.ReactElement {
+export async function SiteFooter(): Promise<React.ReactElement> {
+  let models: { slug: string; name: string }[] = [];
+  try {
+    models = await prisma.model.findMany({
+      where: { isActive: true },
+      orderBy: [{ displayOrder: "asc" }, { startingPrice: "asc" }],
+      select: { slug: true, name: true },
+    });
+  } catch {
+    // Footer renders even if the DB is unreachable; just show no model links.
+    models = [];
+  }
   return (
     <footer className="bg-[var(--color-graphite)] text-white/80">
       <Container className="pb-10 pt-16 md:pb-12 md:pt-24">
@@ -46,7 +57,7 @@ export function SiteFooter(): React.ReactElement {
           <div className="flex flex-col gap-4">
             <h3 className="text-sm font-medium uppercase tracking-[0.16em] text-white">Vehicles</h3>
             <ul className="flex flex-col gap-2 text-sm">
-              {lineup.map((m) => (
+              {models.map((m) => (
                 <li key={m.slug}>
                   <Link
                     href={`/models/${m.slug}`}

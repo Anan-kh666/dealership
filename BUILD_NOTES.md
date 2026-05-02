@@ -199,6 +199,127 @@ Notable decisions:
   `packages/ui` dependency) so the icon imports inside app-level homepage
   components don't reach across the workspace boundary at build time.
 
+## Models pages
+
+The public-facing model browse + detail pages live at:
+
+- `apps/web/src/app/(public)/models/page.tsx` — browse grid with filter
+  chips (`bodyType`, `fuelType` URL params). Server Component; chips are a
+  client island (`apps/web/src/components/models/filter-chips.tsx`).
+- `apps/web/src/app/(public)/models/[slug]/page.tsx` — full detail page:
+  hero gallery (client island), title block, highlights, trim comparison,
+  specs accordion, image grid (client island, lightbox), CTA banner,
+  similar models. Includes `generateMetadata` and Vehicle JSON-LD.
+
+Both pages query Prisma directly via the `@dealership/db` singleton — no
+intermediate fetch hop. Both are `dynamic = "force-dynamic"` so the build
+does not require a live `DATABASE_URL`.
+
+### Data-fetching pattern
+
+| Surface | Source | Why |
+| --- | --- | --- |
+| Next.js Server Components | `prisma` direct from `@dealership/db` | SSR speed — no HTTP roundtrip. |
+| Mobile / third-party / admin | Fastify routes under `/public/models` | Stable JSON contract, Zod-validated. |
+
+Both consumers exist intentionally. Don't proxy one through the other.
+
+### Public Fastify routes
+
+Registered in `apps/api/src/routes/public/models.ts` and mounted under the
+existing `/public` prefix (set in `apps/api/src/server.ts`):
+
+- `GET /public/models` — list. Zod-validated query: `bodyType`, `fuelType`,
+  `priceMax`, `make`. Returns model summary + first image + trim count.
+- `GET /public/models/:slug` — full model with trims (options + colors) and
+  ordered images. 404 on miss.
+
+Decimal columns are stringified before serialization (Prisma `Decimal` →
+string, matching the `decimalString` brand in `@dealership/types`).
+
+### Reusable UI components added
+
+In `packages/ui/src/components/`:
+
+- `accordion.tsx` — Radix Accordion wrapped to brand tokens. Adds the
+  `@radix-ui/react-accordion` runtime dep.
+- `spec-row.tsx` — label / value row with optional trim tag, used in the
+  trim comparison and the specs accordion.
+
+The shadcn `dialog.tsx` import path was changed from `../lib/cn.js` to
+`../lib/cn` so it resolves under `transpilePackages` when the new image
+gallery imports it. The other shadcn primitives still keep `.js` until
+they're imported by an app.
+
+## Seed data
+
+`packages/db/prisma/seed.ts` now seeds 5 Malaysian-market models matching
+the names already in `apps/web/src/data/placeholders.ts`:
+
+- Meridian 1.5 (sedan, RM 96,800 — 2 trims)
+- Aurora SUV (family SUV hybrid, RM 168,000 — 3 trims)
+- Halcyon CX (compact crossover hybrid, RM 142,500 — 2 trims)
+- Lumen EV (electric sedan, RM 218,000 — 3 trims)
+- Continental GT 2026 (flagship coupé, RM 488,000 — 2 trims)
+
+Inventory: **5 models · 12 trims · 12 shared options · ~9 colors · ~32
+images · trim-color upcharges (Pearl White +0, metallic / Deep Marine
++RM 1,500, premium accent +RM 3,500)**.
+
+The seed is idempotent — it deletes-then-recreates each model by slug so
+re-running `pnpm db:seed` is safe. Image URLs are reused from the
+already-verified `placeholders.ts` set so we don't reintroduce the
+broken-Unsplash issue from earlier commits. **Do not** add
+`plus.unsplash.com` URLs — they 401 in production.
+
+### How to run the seed
+
+```bash
+# 1. Make sure DATABASE_URL is set in .env (Postgres 16 recommended).
+cp .env.example .env
+# edit DATABASE_URL — for local dev:
+#   docker run -d -p 5432:5432 -e POSTGRES_PASSWORD=dev postgres:16
+#   then DATABASE_URL=postgresql://postgres:dev@localhost:5432/postgres
+
+# 2. Generate the Prisma client (only required once after schema changes):
+pnpm db:generate
+
+# 3. Apply the migration. The first init migration SQL is checked in at
+#    packages/db/prisma/migrations/0001_init/migration.sql — running
+#    db:migrate:dev will create _prisma_migrations and run it.
+pnpm db:migrate:dev
+
+# 4. Seed.
+pnpm db:seed
+```
+
+### What was assumed because Docker / DATABASE_URL was unavailable
+
+- The seed has not been executed against a real database in this branch.
+  Code and types compile (`pnpm typecheck`, `pnpm build` both green),
+  but the next operator should run `pnpm db:migrate:dev && pnpm db:seed`
+  once a Postgres instance is reachable.
+- The initial migration SQL was generated up-front via
+  `prisma migrate diff --from-empty --to-schema-datamodel` so the
+  migration is already on disk; `db:migrate:dev` will apply it.
+
+## Homepage updates
+
+- `apps/web/src/components/home/lineup.tsx` is now an async Server
+  Component fetching from `prisma.model` directly. The mobile snap-scroll
+  and desktop grid layouts are preserved.
+- `apps/web/src/components/site-footer.tsx` is async and pulls
+  `{ slug, name }` from `prisma.model` for the Vehicles column. It
+  catches DB errors and degrades gracefully (renders without the column
+  links) so the layout still works during local dev without `DATABASE_URL`.
+- The homepage page (`apps/web/src/app/(public)/page.tsx`) is marked
+  `dynamic = "force-dynamic"` for the same reason.
+- `apps/web/src/data/placeholders.ts` no longer exports `lineup` or the
+  `Model` type. Still placeholder until other agents land:
+  `inStock`/`StockUnit` (Available Now row), `bodyTypes` (homepage
+  filter shortcuts), `blogPosts`, `HERO_IMAGE`, `FINANCING_IMAGE`. Header
+  comment in the file enumerates this.
+
 ## Out of scope (handed to other agents)
 
 - Real page UIs beyond the placeholder homepage
