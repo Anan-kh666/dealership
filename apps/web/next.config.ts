@@ -10,6 +10,8 @@ const config: NextConfig = {
       { protocol: "https", hostname: "*.r2.cloudflarestorage.com" },
       // Cloudinary CDN.
       { protocol: "https", hostname: "res.cloudinary.com" },
+      // Unsplash — used for placeholder imagery on the homepage.
+      { protocol: "https", hostname: "images.unsplash.com" },
     ],
   },
   typedRoutes: true,

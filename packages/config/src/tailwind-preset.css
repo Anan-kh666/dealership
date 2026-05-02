@@ -1,8 +1,9 @@
 /*
  * Shared Tailwind v4 preset for the dealership monorepo.
- * Apps/packages import this and layer their own theme tokens on top.
+ * Tokens here MUST mirror packages/ui/src/tokens.ts.
  *
- * Tailwind v4 uses CSS-first configuration via `@theme` blocks.
+ * Aesthetic: editorial premium — graphite + warm off-white, single bronze
+ * accent. Generous space, typographic confidence.
  */
 
 @theme {
@@ -11,30 +12,70 @@
   --font-display: var(--font-fraunces), ui-serif, Georgia, serif;
   --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, monospace;
 
-  /* Neutral surface palette — premium editorial look. */
-  --color-background: oklch(0.99 0 0);
-  --color-foreground: oklch(0.18 0.01 250);
-  --color-muted: oklch(0.96 0.005 250);
-  --color-muted-foreground: oklch(0.5 0.01 250);
-  --color-border: oklch(0.92 0.005 250);
-  --color-input: oklch(0.92 0.005 250);
-  --color-ring: oklch(0.7 0.05 250);
+  /* Letter spacing. */
+  --tracking-display: -0.02em;
+  --tracking-wide-wordmark: 0.18em;
 
-  /* Surfaces. */
-  --color-card: oklch(1 0 0);
-  --color-card-foreground: oklch(0.18 0.01 250);
+  /* ----- Brand surfaces ----- */
+  --color-graphite: oklch(0.198 0 0);
+  --color-surface: oklch(1 0 0);
+  --color-surface-warm: oklch(0.973 0.005 80);
 
-  /* Primary action. */
-  --color-primary: oklch(0.18 0.01 250);
-  --color-primary-foreground: oklch(0.99 0 0);
+  /* ----- Single warm accent (bronze) ----- */
+  --color-accent: oklch(0.638 0.085 70);
+  --color-accent-deep: oklch(0.518 0.063 70);
 
-  /* Destructive. */
-  --color-destructive: oklch(0.55 0.22 27);
-  --color-destructive-foreground: oklch(0.99 0 0);
+  /* ----- Neutral scale built around #6B6B6B ----- */
+  --color-neutral-50: oklch(0.985 0.002 80);
+  --color-neutral-100: oklch(0.96 0.003 80);
+  --color-neutral-200: oklch(0.905 0.004 80);
+  --color-neutral-300: oklch(0.83 0.005 80);
+  --color-neutral-400: oklch(0.66 0.005 80);
+  --color-neutral-500: oklch(0.52 0.003 80);
+  --color-neutral-600: oklch(0.42 0.003 80);
+  --color-neutral-700: oklch(0.33 0.003 80);
+  --color-neutral-800: oklch(0.25 0.002 80);
+  --color-neutral-900: oklch(0.198 0 0);
 
-  /* Radii. */
-  --radius-sm: 0.25rem;
-  --radius-md: 0.5rem;
-  --radius-lg: 0.75rem;
-  --radius-xl: 1rem;
+  /* ----- Semantic ----- */
+  --color-success: oklch(0.5 0.13 155);
+  --color-warning: oklch(0.65 0.13 60);
+  --color-error: oklch(0.5 0.18 28);
+
+  /* ----- shadcn/ui tokens (mapped onto the brand palette) ----- */
+  --color-background: var(--color-surface);
+  --color-foreground: var(--color-graphite);
+  --color-muted: var(--color-neutral-100);
+  --color-muted-foreground: var(--color-neutral-500);
+  --color-border: var(--color-neutral-200);
+  --color-input: var(--color-neutral-200);
+  --color-ring: var(--color-accent);
+
+  --color-card: var(--color-surface);
+  --color-card-foreground: var(--color-graphite);
+
+  --color-primary: var(--color-graphite);
+  --color-primary-foreground: var(--color-surface);
+
+  --color-destructive: var(--color-error);
+  --color-destructive-foreground: var(--color-surface);
+
+  /* ----- Radii ----- */
+  --radius-sm: 0.375rem;   /* 6px */
+  --radius-md: 0.625rem;   /* 10px */
+  --radius-lg: 1rem;       /* 16px */
+  --radius-xl: 1.5rem;     /* 24px */
+
+  /* ----- Shadows (very subtle) ----- */
+  --shadow-1: 0 1px 2px 0 rgb(0 0 0 / 0.05), 0 1px 1px 0 rgb(0 0 0 / 0.04);
+  --shadow-2: 0 4px 8px -2px rgb(0 0 0 / 0.08), 0 2px 4px -2px rgb(0 0 0 / 0.06);
+  --shadow-3: 0 12px 24px -6px rgb(0 0 0 / 0.12), 0 4px 8px -4px rgb(0 0 0 / 0.08);
+  --shadow-4: 0 24px 48px -12px rgb(0 0 0 / 0.18), 0 8px 16px -8px rgb(0 0 0 / 0.10);
+
+  /* ----- Motion ----- */
+  --duration-quick: 150ms;
+  --duration-standard: 250ms;
+  --duration-reveal: 400ms;
+  --ease-out-soft: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out-soft: cubic-bezier(0.65, 0, 0.35, 1);
 }
