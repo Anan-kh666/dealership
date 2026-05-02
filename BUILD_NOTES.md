@@ -336,6 +336,7 @@ pnpm db:seed
   filter shortcuts), `blogPosts`, `HERO_IMAGE`, `FINANCING_IMAGE`. Header
   comment in the file enumerates this.
 
+
 ## Stock pages
 
 The public stock inventory pages live at:
@@ -449,6 +450,169 @@ upsert re-creates everything cleanly.
   Next.js webpack does not resolve `.js` for TS files in workspace
   packages under `transpilePackages`. Same fix that the design-system
   agent applied to the UI package's `cn` import.
+
+## Test drive booking
+
+The `/test-drive` standalone booking page and supporting public API routes
+landed alongside this section.
+
+### What was built
+
+- `apps/web/src/app/(public)/test-drive/page.tsx` — Server Component shell.
+  Reads `modelId` / `stockUnitId` / `slug` query params, fetches the prefilled
+  vehicle directly from Prisma, and pre-loads the model + in-stock lists for
+  the chooser. Marked `dynamic = "force-dynamic"`.
+- `apps/web/src/app/(public)/test-drive/test-drive-flow.tsx` — top-level
+  Client Component island. Step routing, persistent header card, progress
+  dots, focus-on-heading on step change.
+- `steps/{vehicle,datetime,details,confirmation,success}-step.tsx` — five
+  step components.
+- `apps/web/src/app/(public)/test-drive/calendar.tsx` — small custom 7-column
+  calendar grid. `role="grid"`, day buttons are `role="gridcell"`, arrow
+  keys move selection across non-disabled cells.
+- `apps/web/src/stores/test-drive-store.ts` — Zustand store with the
+  `persist` middleware writing to **`sessionStorage`** (short-lived form
+  data, not `localStorage`). Resets on successful submit.
+- `apps/web/src/lib/test-drive/{holidays,slots,phone}.ts` — shared helpers.
+  The MY 2026 holiday list is duplicated server-side at
+  `apps/api/src/lib/holidays.ts` — keep these two in sync until we move the
+  list to a DB-backed admin config.
+- `apps/api/src/routes/public/test-drives.ts` — three Fastify routes:
+  - `GET /public/test-drives/availability?date=YYYY-MM-DD` — slot list in
+    Asia/Kuala_Lumpur, excludes lunch (12:30–13:30), excludes
+    `REQUESTED|CONFIRMED` bookings, excludes past slots when the date is
+    today, returns an empty list on closed days.
+  - `POST /public/test-drives` — creates the booking. See slot-locking
+    note below. After commit, renders the React Email template and logs
+    the `{ to, subject, html }` payload (see "Email stub").
+  - `GET /public/test-drives/:id/ics` — text/calendar download. Title
+    `Test drive — [Model] [Trim]`, 60-min duration, 1-hour reminder.
+    Rate-limited 10/min/IP via `@fastify/rate-limit` route config.
+- `apps/api/src/emails/test-drive-confirmation.tsx` — React Email template.
+- `packages/db/prisma/schema.prisma` + `migrations/0002_test_drive_license/` —
+  added `drivingLicense String?` to `TestDrive`.
+- `packages/types/src/forms.ts` — extended `testDriveBookingSchema` with
+  `drivingLicense` and tightened `notes` max to 500 to match the form. The
+  schema is shared between the web RHF resolver and the API route validator.
+- `apps/web/src/app/(public)/models/[slug]/page.tsx` — fixed the
+  "Schedule Test Drive" CTA href to include `?modelId=${model.id}`.
+
+### Date / timezone handling
+
+Chose **`date-fns` + `date-fns-tz`** over `@internationalized/date`.
+Reasons:
+
+- We needed timezone math in two places: the API (slot generation +
+  conflict detection) and the web (calendar rendering + slot picker). One
+  library on both sides means one mental model.
+- `react-aria` would have only bought us calendar a11y; we still needed a
+  timezone library separately. The custom calendar is small (~150 lines)
+  and matches the editorial-premium aesthetic better than the default
+  react-aria primitives.
+
+All times in the system are anchored to **Asia/Kuala_Lumpur (UTC+8)**.
+The calendar generates KL-local YYYY-MM-DD strings; the API rounds-trips
+those through `fromZonedTime` to produce UTC `Date`s for storage and
+queries. `Decimal` columns are still stringified for serialization (no
+change to the existing pattern).
+
+### Slot-locking strategy
+
+`POST /public/test-drives` runs inside a Postgres transaction with
+**`Serializable` isolation** (`prisma.$transaction(fn, { isolationLevel: "Serializable" })`).
+Inside the transaction the route does a `findFirst` on
+`scheduledAt + status IN (REQUESTED, CONFIRMED)`. If a row exists, the
+route throws a `SlotTakenError` and the transaction rolls back. Two
+clients hitting the same slot at the same instant will produce exactly
+one winner: either the second one finds the first one's row, or
+Postgres's serialization layer raises `40001` (Prisma `P2034`), which
+the route also catches and surfaces as `409 { error: "slot_taken" }`.
+
+Client behavior on `409`: the booking flow surfaces an inline error and
+bumps the user back to Step 2 (date & time) with the slot cleared.
+
+Gotcha: the API also defends against bad `scheduledAt` values that didn't
+come from the availability endpoint — closed days, non-30-min boundaries,
+and past times all return `400` rather than persisting bad data.
+
+### Email stub
+
+We render the confirmation email with `@react-email/render` and log the
+output as a structured Pino log line:
+
+```json
+{
+  "email": {
+    "to": "...",
+    "subject": "Test drive confirmed — ...",
+    "html": "<!doctype html>..."
+  }
+}
+```
+
+No actual send happens — Resend wiring is out of scope and is the next
+agent's job. `RESEND_API_KEY` already exists in `.env.example`. To
+preview the email visually, you can copy the logged HTML into a file and
+open it in a browser, or run the React Email dev server later if we add
+one.
+
+### Rate limiting
+
+Added `@fastify/rate-limit` with `global: false`. The ICS download route
+opts in via per-route `config.rateLimit` (10/min/IP). The other public
+routes are not rate-limited — revisit if abuse becomes an issue.
+
+### Malaysian public holidays — 2026
+
+Hard-coded in `apps/web/src/lib/test-drive/holidays.ts` and
+`apps/api/src/lib/holidays.ts` (keep in sync):
+
+- 1 Jan — New Year's Day
+- 17–18 Feb — Chinese New Year
+- 21–22 Mar — Hari Raya Puasa
+- 1 May — Wesak Day
+- 27 May — Hari Raya Haji
+- 31 Aug — Merdeka Day
+- 16 Sep — Malaysia Day
+- 28 Oct — Deepavali
+- 25 Dec — Christmas Day
+
+Should move to a DB-backed admin config later — the dual-source duplication
+is a known smell.
+
+### Hero CTA — decision
+
+The brief asked us to verify the homepage hero secondary CTA points to
+`/test-drive`. The existing hero has two CTAs ("Build Yours" → `/models`,
+"Available Now" → `/stock`); changing either label-link pair would be a
+hero redesign, which the brief separately disallows ("DO NOT modify the
+homepage hero"). **Resolution:** left the hero untouched. Entry to
+`/test-drive` is via the site header nav link, the site footer nav link,
+and the per-model "Schedule Test Drive" CTA (now wired to
+`?modelId=${model.id}`).
+
+### WhatsApp number is a placeholder
+
+`https://wa.me/60378012345` and `+60 3 7801 2345` are placeholders shared
+with the site footer. Replace before launch.
+
+### Optional account creation — deferred
+
+Step 3 has an "Create an account?" checkbox. Today the flow only
+collects the password; it does **not** write a `User` row or send a
+verification email. The full sign-up path is the auth agent's
+responsibility — when that lands, the auth agent should pull the
+collected password from the booking flow's submit and finish the
+account-creation handshake.
+
+### Verification gaps
+
+Without a live `DATABASE_URL` we couldn't run `db:migrate:dev` or
+exercise the full flow end-to-end against real data. `pnpm typecheck`,
+`pnpm lint`, and `pnpm build` are the gates we ran. Manual browser /
+slot-locking verification is in the brief's checklist — run it after
+`db:migrate:dev` lands the `0002_test_drive_license` migration.
+
 
 ## Out of scope (handed to other agents)
 
