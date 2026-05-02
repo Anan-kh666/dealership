@@ -625,6 +625,141 @@ slot-locking verification is in the brief's checklist — run it after
 - Admin dashboard
 - Deploy targets (Vercel, Fly.io, etc.) and any associated workflows
 
+## Trade-in flow
+
+Customer-facing valuation submission lives at:
+
+- `apps/web/src/app/(public)/trade-in/page.tsx` — server-rendered shell. All
+  form interaction is the `<TradeInFlow>` client island.
+- `apps/web/src/components/trade-in/*` — five steps (vehicle, condition,
+  photos, contact, review) plus a success screen and a 5-dot progress
+  indicator with sticky mobile back/next.
+- `apps/web/src/stores/tradeInStore.ts` — Zustand store persisted to
+  `sessionStorage`. Photo upload state is split: completed `publicUrl`s live
+  in the store; in-flight uploads stay local to the photos step.
+- `apps/web/src/lib/phone.ts` — Malaysian-mobile validator used by the
+  contact step. **TODO:** dedupe with the test-drive flow's helper once
+  that lands; both should reduce to `mlPhone` in `@dealership/types`.
+
+The flow uses React Hook Form + Zod resolver per step. Tabs / radio cards /
+yes-no toggles / textareas are styled inline rather than as new UI
+primitives so we don't grow `packages/ui` ahead of what's reused. Two
+shadcn primitives that previously kept `.js` import suffixes
+(`Input`, `Label`) were updated to drop them — they now import
+`../lib/cn` so they resolve under Next's `transpilePackages`.
+
+### Reference number format
+
+`TI-XXXXXX` — last 6 chars of the cuid `id`, uppercased. Derived in
+`apps/api/src/lib/reference.ts` (`tradeInReferenceFromId` /
+`tradeInIdSuffixFromReference`). The id stays canonical; the reference is
+just a friendlier surface for customers. The lookup endpoint converts the
+suffix back to lowercase and runs `findFirst({ where: { id: { endsWith }}})`.
+
+### Photo upload (R2)
+
+- `POST /public/uploads/presign` (apps/api/src/routes/public/uploads.ts)
+  validates the content-type allowlist (jpeg/png/webp/heic), file size
+  (≤ 10 MB), and `purpose: "trade-in"`. Returns
+  `{ uploadUrl, publicUrl, key, expiresIn: 300 }`. Rate-limit: 30 per IP
+  per hour (`apps/api/src/lib/rate-limit.ts`, in-memory).
+- The web client hits `${NEXT_PUBLIC_API_URL}/public/uploads/presign`,
+  then PUTs the file directly to R2 — never proxied through Fastify.
+- R2 client lives at `apps/api/src/lib/r2.ts`. `readR2Config()` returns
+  `null` if any of `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET`,
+  `R2_ENDPOINT` is missing; an optional `R2_PUBLIC_BASE_URL` overrides
+  the default `${R2_ENDPOINT}/${R2_BUCKET}` for custom CDN domains.
+
+### R2 fallback ("Skip for now")
+
+When the presign endpoint returns 503 with
+`{ error: "storage_not_configured" }`, the photos step swaps the upload
+zone for an inline warning and a "Skip for now" button. Skipping sets
+`photosSkipped: true` in the store and lets submission proceed with
+`photos: []`. The submitted `notes` JSON includes `photosSkipped: true`
+so staff know to chase photos directly. This keeps the form usable in
+dev environments without R2 credentials.
+
+### Email stub
+
+`POST /public/trade-ins` calls `request.log.info` with a payload that
+mirrors the notification staff would receive (reference, vehicle, contact,
+photo count, photosSkipped flag). **Resend is not wired** — once it is,
+replace the log call with a real send.
+
+### Schema gaps
+
+The current `TradeIn` Prisma model only persists a subset of the submitted
+fields directly: `vin`, `make`, `model`, `year`, `mileage`, `condition`,
+`photos`, `contactName/Email/Phone`, `status`, plus `notes` and
+`estimatedValue`. Everything else from the form is JSON-encoded into the
+`notes` text column for now:
+
+- `trim` / variant
+- `serviceHistory` + `serviceLocation`
+- `accidentHistory` + `accidentNote`
+- `modifications` + `modificationsNote`
+- `preferredContactMethod` (PHONE / EMAIL / WHATSAPP)
+- `bestTimeToCall` (MORNING / AFTERNOON / EVENING / ANYTIME)
+- `configurationId` — captured from the `?configurationId=` URL param so
+  staff can later send a quote linked to a saved build. **TODO:** add a
+  dedicated nullable `configurationId` foreign key on `TradeIn` once the
+  configurator agent lands; until then it's read-only metadata in `notes`.
+- `photosSkipped` — set when the user took the storage-fallback skip path.
+
+### Public Fastify routes
+
+Registered in `apps/api/src/routes/public/index.ts`:
+
+- `POST /public/uploads/presign` — see above. 30/IP/hour, 503 if R2 is
+  unconfigured.
+- `POST /public/trade-ins` — Zod-validated full submission
+  (`tradeInFullSubmissionSchema` in `@dealership/types`). Creates the row
+  at status `SUBMITTED`, returns `{ id, reference }`. 5/IP/day.
+- `GET /public/trade-ins/:reference` — minimal status info
+  (`{ reference, status, submittedAt, estimatedValue }`). Public-but-uses-
+  reference-as-token; no PII in the response. 30/IP/hour. **Not consumed
+  by the trade-in flow** — built for the future "Track this submission"
+  page on `/account/trade-ins` (the auth / account agent will read it).
+
+These routes drop response schemas intentionally — `fastify-type-provider-zod`
+only supports a single response shape per status code, and we mix 200 / 429 /
+503 / 404. Input validation still uses Zod; outputs are TypeScript-typed
+in code.
+
+### Schemas
+
+`@dealership/types` gained a new `trade-in.ts` module:
+
+- `mlPhone` (in `primitives.ts`) — stricter Malaysian mobile regex; strips
+  spaces and dashes before validating. Mirrored client-side in
+  `apps/web/src/lib/phone.ts`.
+- `tradeInVehicleSchema`, `tradeInConditionSchema`, `tradeInContactSchema`
+  — per-step shapes. The web app mostly uses ad-hoc per-step Zod schemas
+  inside RHF, but these are exported for reuse.
+- `tradeInFullSubmissionSchema` — the `POST /public/trade-ins` body shape
+  with the `photosSkipped || photos.length >= 4` refine.
+
+The original `tradeInSubmissionSchema` in `forms.ts` was left in place —
+it's a leaner shape that may still be wanted by the admin agent.
+
+### Rate limiter
+
+`apps/api/src/lib/rate-limit.ts` is an in-memory fixed-window counter,
+keyed per limiter. Suitable for single-process v1 deploys. Replace with
+Redis (`REDIS_URL` already in `.env.example`) when scaling out.
+
+### New runtime dependencies
+
+- `apps/api`: `@aws-sdk/client-s3`, `@aws-sdk/s3-request-presigner`,
+  `nanoid`.
+
+### Embedded entry points
+
+The footer `Services` column in `apps/web/src/components/site-footer.tsx`
+already links to `/trade-in`. No homepage / models / stock CTA changes
+were made — those were deferred per the brief.
+
 ## Verification checklist (run locally before merging downstream work)
 
 ```bash
