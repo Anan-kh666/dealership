@@ -336,6 +336,120 @@ pnpm db:seed
   filter shortcuts), `blogPosts`, `HERO_IMAGE`, `FINANCING_IMAGE`. Header
   comment in the file enumerates this.
 
+## Stock pages
+
+The public stock inventory pages live at:
+
+- `apps/web/src/app/(public)/stock/page.tsx` — browse grid with a sidebar
+  filter (model, trim, body type, fuel type, exterior color, price range,
+  monthly-payment range), sort dropdown, and "Load more" pagination
+  (24 per page). The sidebar is a client island
+  (`apps/web/src/components/stock/filter-sidebar.tsx`); on mobile it
+  appears inside a bottom-sheet drawer triggered by a "Filters" button.
+- `apps/web/src/app/(public)/stock/[slug]/page.tsx` — full detail page:
+  image gallery (client island), quick-facts row, title block, three CTAs
+  (Test Drive / Get Financing / Reserve-or-Inquire dialog), tabbed content
+  (overview, specs, what's included), finance widget placeholder, trust
+  strip, similar in-stock units, sticky desktop top bar, sticky mobile CTA
+  bar, JSON-LD `Vehicle` + `Offer`, and `generateMetadata`. `notFound()`
+  on missing slug.
+
+Both pages query Prisma directly via `@dealership/db` for SSR speed and
+are marked `dynamic = "force-dynamic"` so the build doesn't require a
+live `DATABASE_URL`.
+
+The public list hides `SOLD` and `RESERVED` units by default — only
+`AVAILABLE` and `IN_TRANSIT` are visible.
+
+### Similar-units logic — page, not API
+
+The "similar in-stock units" block on the detail page computes its own
+results inside the Server Component (three Prisma queries, narrowing
+each round). Reasoning: keeping it on the page lets the SSR fetch
+finish in one render with no API hop, and there is no other consumer
+yet that needs the same logic. If a mobile client later needs it,
+extract to `apps/api/src/routes/public/stock.ts`.
+
+### In-memory rate-limit fallback
+
+Both the Fastify `POST /public/inquiries` route and the Next.js
+`POST /api/public/inquiries` route handler enforce **5 requests per IP
+per hour**. The Next handler uses an in-process `Map` because the web
+app is a single-instance Next server today; the Fastify route uses
+`@fastify/rate-limit` with its in-memory store. Both should switch to a
+shared Redis backend once `REDIS_URL` is wired (the Fastify rate-limit
+plugin accepts a `redis` client option; the Next handler should be
+swapped for an Upstash-style limiter or moved behind the Fastify route).
+
+The `POST /public/stock/:id/view` endpoint similarly tracks "1 view per
+IP per stock unit per hour" via an in-memory `Map` with a 5-minute
+sweeper, ready to be swapped for Redis.
+
+### Public Fastify routes
+
+Registered in `apps/api/src/routes/public/`:
+
+- `GET /public/stock` — Zod-validated query: `model`, `trim`, `bodyType`,
+  `fuelType`, `color`, `priceMin`, `priceMax`, `sort`
+  (`newest` / `price-asc` / `price-desc` / `days-on-lot`), `page`,
+  `limit` (default 24, max 48), `includeUnavailable` (default false).
+  Returns `{ items, total, hasMore }`. Each item includes trim+model,
+  exterior color, and the first image.
+- `GET /public/stock/:slug` — full stock unit with trim (model + options),
+  exterior + interior color, all images.
+- `POST /public/inquiries` — Zod-validated; rate-limited 5/IP/hour.
+- `POST /public/stock/:id/view` — increments `StockUnit.views`
+  fire-and-forget; rate-limited to 1 per IP per stock unit per hour
+  (in-memory until Redis is added).
+
+The `@fastify/rate-limit` plugin is registered globally for the public
+plugin scope with `global: false`, so individual routes opt in via
+`config.rateLimit`.
+
+### Seed inventory
+
+`packages/db/prisma/seed.ts` now appends **15 stock units across 5
+models**:
+
+- Meridian 1.5 — 4 units (Standard / Executive, mixed colors)
+- Aurora SUV — 3 units (Comfort / Premium / Reserve)
+- Halcyon CX — 3 units (Active / Sport)
+- Lumen EV — 2 units (Long Range / Performance)
+- Continental GT — 3 units (GT V8 / GT Speed)
+
+Status distribution: 11 `AVAILABLE`, 2 `IN_TRANSIT`, 1 `RESERVED`,
+1 `SOLD` so every status renders somewhere on the public surface.
+VINs are deterministic (`WBA{model_code}{year}{seq}`, 17 chars) and
+stock units are upserted by `vin` so re-running is safe.
+
+Stock units carry no schema-level cascade from `Trim`, so the model
+rebuild step now wipes `stockImage` and `stockUnit` first; the
+upsert re-creates everything cleanly.
+
+### New components in `packages/ui`
+
+- `slider.tsx` — wraps `@radix-ui/react-slider` (added as a runtime dep)
+  with the brand tokens. Used for both range sliders in the filter
+  sidebar.
+- `color-swatch.tsx` — round swatch with optional click handler and
+  selection ring. Sizes: `sm` / `md` / `lg`.
+- `status-badge.tsx` — pill for `StockStatus`, with optional
+  `daysOnLot` (surfaces "Xd on lot" once past 14 days) and
+  `daysUntilDelivery` (composes "Arriving in X days" for IN_TRANSIT).
+- `filter-drawer.tsx` — Radix-Dialog-based bottom-sheet wrapper used as
+  the mobile filter trigger.
+
+### `packages/types`
+
+- `finance.ts` — `monthlyPayment` and `priceForMonthly` plus
+  `FINANCE_DEFAULTS` (84-month term, 3.5% APR, 10% down). Used by the
+  filter sidebar's monthly-payment slider and the detail-page "Est.
+  RM X/mo" line.
+- `index.ts` no longer uses `.js` extensions on its own re-exports —
+  Next.js webpack does not resolve `.js` for TS files in workspace
+  packages under `transpilePackages`. Same fix that the design-system
+  agent applied to the UI package's `cn` import.
+
 ## Out of scope (handed to other agents)
 
 - Real page UIs beyond the placeholder homepage

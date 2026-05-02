@@ -13,8 +13,8 @@ import {
   TestDriveStatus,
   TradeInStatus,
   Transmission,
-} from "./enums.js";
-import { cuid, decimalString, email, isoDateTime, phone, url } from "./primitives.js";
+} from "./enums";
+import { cuid, decimalString, email, isoDateTime, phone, url } from "./primitives";
 
 export const ModelSchema = z.object({
   id: cuid,

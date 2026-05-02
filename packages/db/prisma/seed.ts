@@ -6,6 +6,7 @@ import {
   FuelType,
   ImageType,
   OptionCategory,
+  StockStatus,
   Transmission,
 } from "@prisma/client";
 
@@ -757,6 +758,12 @@ const upchargeFor = (colorName: string): string => {
 };
 
 async function main(): Promise<void> {
+  // Stock units hold FKs to trims (no cascade), so they would block the
+  // model rebuild below. Clear them up-front; the stock-unit pass at the
+  // bottom will re-create them by VIN.
+  await prisma.stockImage.deleteMany();
+  await prisma.stockUnit.deleteMany();
+
   // Wipe global tables; cascade clears the join tables.
   await prisma.color.deleteMany();
   await prisma.option.deleteMany();
@@ -884,6 +891,320 @@ async function main(): Promise<void> {
   console.log(
     `Seed complete — ${MODELS.length} models, ${trimCount} trims, ${imageCount} images, ${optionLinkCount} option links, ${trimColorCount} trim-color links.`,
   );
+
+  // ============ STOCK UNITS ============
+  const stockSummary = await seedStockUnits(colorsByName, optionsByName);
+  // eslint-disable-next-line no-console
+  console.log(
+    `Stock seed complete — ${stockSummary.units} units, ${stockSummary.images} images.`,
+  );
+}
+
+// ----------------- Stock unit seed -----------------
+
+type StockUnitSeed = {
+  modelSlug: string;
+  trimName: string;
+  exteriorColor: string;
+  interiorColor: string;
+  installedOptionNames: string[];
+  status: StockStatus;
+  /** Days *before* the seed run when the unit arrived (for AVAILABLE / RESERVED / SOLD). */
+  arrivedDaysAgo?: number;
+  /** Days *after* the seed run when the unit is expected to land (for IN_TRANSIT). */
+  expectedInDays?: number;
+  /** Stable seven-digit suffix for VIN + slug. */
+  seq: string;
+};
+
+const STOCK_UNITS: StockUnitSeed[] = [
+  // Meridian 1.5 — 4 units
+  {
+    modelSlug: "meridian-1-5",
+    trimName: "Standard",
+    exteriorColor: "Pearl White",
+    interiorColor: "Charcoal",
+    installedOptionNames: ["Adaptive Cruise Control", "Blind-Spot Monitoring"],
+    status: StockStatus.AVAILABLE,
+    arrivedDaysAgo: 35,
+    seq: "0000001",
+  },
+  {
+    modelSlug: "meridian-1-5",
+    trimName: "Standard",
+    exteriorColor: "Graphite Metallic",
+    interiorColor: "Charcoal",
+    installedOptionNames: ["Heated & Ventilated Seats"],
+    status: StockStatus.AVAILABLE,
+    arrivedDaysAgo: 12,
+    seq: "0000002",
+  },
+  {
+    modelSlug: "meridian-1-5",
+    trimName: "Executive",
+    exteriorColor: "Deep Marine",
+    interiorColor: "Caramel",
+    installedOptionNames: ["Panoramic Sunroof"],
+    status: StockStatus.AVAILABLE,
+    arrivedDaysAgo: 22,
+    seq: "0000003",
+  },
+  {
+    modelSlug: "meridian-1-5",
+    trimName: "Executive",
+    exteriorColor: "Crimson Pearl",
+    interiorColor: "Charcoal",
+    installedOptionNames: ["Panoramic Sunroof"],
+    status: StockStatus.IN_TRANSIT,
+    expectedInDays: 14,
+    seq: "0000004",
+  },
+
+  // Aurora SUV — 3 units
+  {
+    modelSlug: "aurora-suv",
+    trimName: "Comfort",
+    exteriorColor: "Pearl White",
+    interiorColor: "Charcoal",
+    installedOptionNames: ["Heated & Ventilated Seats", "Panoramic Sunroof"],
+    status: StockStatus.AVAILABLE,
+    arrivedDaysAgo: 8,
+    seq: "0000001",
+  },
+  {
+    modelSlug: "aurora-suv",
+    trimName: "Premium",
+    exteriorColor: "Graphite Metallic",
+    interiorColor: "Caramel",
+    installedOptionNames: [],
+    status: StockStatus.AVAILABLE,
+    arrivedDaysAgo: 18,
+    seq: "0000002",
+  },
+  {
+    modelSlug: "aurora-suv",
+    trimName: "Reserve",
+    exteriorColor: "Forest Green",
+    interiorColor: "Caramel",
+    installedOptionNames: ["Tow Package"],
+    status: StockStatus.AVAILABLE,
+    arrivedDaysAgo: 30,
+    seq: "0000003",
+  },
+
+  // Halcyon CX — 3 units
+  {
+    modelSlug: "halcyon-cx",
+    trimName: "Active",
+    exteriorColor: "Sienna Bronze",
+    interiorColor: "Charcoal",
+    installedOptionNames: ["Panoramic Sunroof", "20\" Alloy Wheels"],
+    status: StockStatus.AVAILABLE,
+    arrivedDaysAgo: 5,
+    seq: "0000001",
+  },
+  {
+    modelSlug: "halcyon-cx",
+    trimName: "Active",
+    exteriorColor: "Pearl White",
+    interiorColor: "Charcoal",
+    installedOptionNames: ["20\" Alloy Wheels"],
+    status: StockStatus.SOLD,
+    arrivedDaysAgo: 45,
+    seq: "0000002",
+  },
+  {
+    modelSlug: "halcyon-cx",
+    trimName: "Sport",
+    exteriorColor: "Deep Marine",
+    interiorColor: "Caramel",
+    installedOptionNames: [],
+    status: StockStatus.AVAILABLE,
+    arrivedDaysAgo: 24,
+    seq: "0000003",
+  },
+
+  // Lumen EV — 2 units
+  {
+    modelSlug: "lumen-ev",
+    trimName: "Long Range",
+    exteriorColor: "Pearl White",
+    interiorColor: "Charcoal",
+    installedOptionNames: ["Head-Up Display"],
+    status: StockStatus.AVAILABLE,
+    arrivedDaysAgo: 10,
+    seq: "0000001",
+  },
+  {
+    modelSlug: "lumen-ev",
+    trimName: "Performance",
+    exteriorColor: "Graphite Metallic",
+    interiorColor: "Charcoal",
+    installedOptionNames: [],
+    status: StockStatus.RESERVED,
+    arrivedDaysAgo: 7,
+    seq: "0000002",
+  },
+
+  // Continental GT — 3 units
+  {
+    modelSlug: "continental-gt-2026",
+    trimName: "GT V8",
+    exteriorColor: "Crimson Pearl",
+    interiorColor: "Caramel",
+    installedOptionNames: [],
+    status: StockStatus.AVAILABLE,
+    arrivedDaysAgo: 50,
+    seq: "0000001",
+  },
+  {
+    modelSlug: "continental-gt-2026",
+    trimName: "GT V8",
+    exteriorColor: "Pearl White",
+    interiorColor: "Charcoal",
+    installedOptionNames: [],
+    status: StockStatus.AVAILABLE,
+    arrivedDaysAgo: 3,
+    seq: "0000002",
+  },
+  {
+    modelSlug: "continental-gt-2026",
+    trimName: "GT Speed",
+    exteriorColor: "Graphite Metallic",
+    interiorColor: "Charcoal",
+    installedOptionNames: [],
+    status: StockStatus.IN_TRANSIT,
+    expectedInDays: 21,
+    seq: "0000003",
+  },
+];
+
+const MODEL_VIN_CODE: Record<string, string> = {
+  "meridian-1-5": "MER",
+  "aurora-suv": "AUR",
+  "halcyon-cx": "HAL",
+  "lumen-ev": "LUM",
+  "continental-gt-2026": "CON",
+};
+
+function slugify(s: string): string {
+  return s
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
+}
+
+function buildVin(modelSlug: string, year: number, seq: string): string {
+  const code = MODEL_VIN_CODE[modelSlug] ?? "XXX";
+  // 3 + 3 + 4 + 7 = 17 chars.
+  const vin = `WBA${code}${year}${seq}`;
+  return vin;
+}
+
+async function seedStockUnits(
+  colorsByName: Map<string, string>,
+  optionsByName: Map<string, string>,
+): Promise<{ units: number; images: number }> {
+  const models = await prisma.model.findMany({
+    include: { trims: true, images: { orderBy: { order: "asc" } } },
+  });
+  const modelsBySlug = new Map(models.map((m) => [m.slug, m] as const));
+
+  const sharedOptionPriceByName = new Map(
+    SHARED_OPTIONS.map((o) => [o.name, Number(o.price)] as const),
+  );
+
+  let unitCount = 0;
+  let imageCount = 0;
+
+  for (const u of STOCK_UNITS) {
+    const model = modelsBySlug.get(u.modelSlug);
+    if (!model) continue;
+    const trim = model.trims.find((t) => t.name === u.trimName);
+    if (!trim) continue;
+    const exteriorColorId = colorsByName.get(u.exteriorColor);
+    const interiorColorId = colorsByName.get(u.interiorColor);
+    if (!exteriorColorId || !interiorColorId) continue;
+
+    const installedOptionIds = u.installedOptionNames
+      .map((n) => optionsByName.get(n))
+      .filter((id): id is string => Boolean(id));
+
+    const optionsTotal = u.installedOptionNames.reduce(
+      (sum, n) => sum + (sharedOptionPriceByName.get(n) ?? 0),
+      0,
+    );
+    const colorUpcharge = Number(upchargeFor(u.exteriorColor));
+    const totalPrice = Number(trim.price) + colorUpcharge + optionsTotal;
+
+    const vin = buildVin(model.slug, model.year, u.seq);
+    const slug = `${model.slug}-${slugify(u.trimName)}-${slugify(u.exteriorColor)}-${u.seq.slice(-4)}`;
+
+    let arrivalDate: Date | null = null;
+    let expectedDelivery: Date | null = null;
+    let daysOnLot = 0;
+    if (u.status === StockStatus.IN_TRANSIT) {
+      if (u.expectedInDays !== undefined) {
+        expectedDelivery = new Date(Date.now() + u.expectedInDays * 24 * 60 * 60 * 1000);
+      }
+    } else if (u.arrivedDaysAgo !== undefined) {
+      arrivalDate = new Date(Date.now() - u.arrivedDaysAgo * 24 * 60 * 60 * 1000);
+      daysOnLot = u.arrivedDaysAgo;
+    }
+
+    const created = await prisma.stockUnit.upsert({
+      where: { vin },
+      update: {
+        slug,
+        trimId: trim.id,
+        exteriorColorId,
+        interiorColorId,
+        installedOptions: installedOptionIds,
+        totalPrice: totalPrice.toFixed(2),
+        status: u.status,
+        arrivalDate,
+        expectedDelivery,
+        daysOnLot,
+      },
+      create: {
+        vin,
+        slug,
+        trimId: trim.id,
+        exteriorColorId,
+        interiorColorId,
+        installedOptions: installedOptionIds,
+        totalPrice: totalPrice.toFixed(2),
+        status: u.status,
+        arrivalDate,
+        expectedDelivery,
+        daysOnLot,
+      },
+    });
+    unitCount += 1;
+
+    // Images: pick 5-6 from the model's pool. Reuse model image URLs so
+    // we don't reintroduce broken Unsplash IDs.
+    const pool = model.images.length > 0 ? model.images : [];
+    const take = Math.min(6, Math.max(5, pool.length));
+    const picks = pool.slice(0, take);
+
+    await prisma.stockImage.deleteMany({ where: { stockUnitId: created.id } });
+    if (picks.length > 0) {
+      await prisma.stockImage.createMany({
+        data: picks.map((img, i) => ({
+          stockUnitId: created.id,
+          url: img.url,
+          altText: `${model.name} ${u.trimName} in ${u.exteriorColor}${
+            i === 0 ? " — front three-quarter" : i === 1 ? " — side profile" : ""
+          }`,
+          order: i + 1,
+        })),
+      });
+      imageCount += picks.length;
+    }
+  }
+
+  return { units: unitCount, images: imageCount };
 }
 
 main()
