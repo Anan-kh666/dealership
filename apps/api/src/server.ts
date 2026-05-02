@@ -1,5 +1,6 @@
 import Fastify, { type FastifyInstance } from "fastify";
 import cors from "@fastify/cors";
+import rateLimit from "@fastify/rate-limit";
 import {
   serializerCompiler,
   validatorCompiler,
@@ -21,6 +22,14 @@ export async function buildServer(): Promise<FastifyInstance> {
   await server.register(cors, {
     origin: [webOrigin],
     credentials: true,
+  });
+
+  // Loose global rate limit. Hot routes (e.g. /public/test-drives/:id/ics)
+  // tighten this via per-route `config.rateLimit`.
+  await server.register(rateLimit, {
+    global: false,
+    max: 600,
+    timeWindow: "1 minute",
   });
 
   await server.register(healthRoute);

@@ -194,13 +194,14 @@ model TestDrive {
   stockUnit   StockUnit?      @relation(fields: [stockUnitId], references: [id])
   userId      String?
   user        User?           @relation(fields: [userId], references: [id])
-  guestName   String?
-  guestEmail  String?
-  guestPhone  String?
-  scheduledAt DateTime
-  status      TestDriveStatus @default(REQUESTED)
-  notes       String?
-  createdAt   DateTime        @default(now())
+  guestName       String?
+  guestEmail      String?
+  guestPhone      String?
+  drivingLicense  String?
+  scheduledAt     DateTime
+  status          TestDriveStatus @default(REQUESTED)
+  notes           String?
+  createdAt       DateTime        @default(now())
 
   @@index([scheduledAt])
 }

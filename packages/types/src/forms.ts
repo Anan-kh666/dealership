@@ -5,8 +5,8 @@ import {
   FuelType,
   StockStatus,
   Transmission,
-} from "./enums";
-import { cuid, decimalString, email, phone } from "./primitives";
+} from "./enums.js";
+import { cuid, decimalString, email, phone } from "./primitives.js";
 
 /**
  * Filters for the inventory and model browsing pages. All fields are optional;
@@ -36,8 +36,9 @@ export const testDriveBookingSchema = z.object({
   guestName: z.string().min(1).max(120),
   guestEmail: email,
   guestPhone: phone,
+  drivingLicense: z.string().trim().min(6).max(40),
   scheduledAt: z.coerce.date(),
-  notes: z.string().max(1000).optional(),
+  notes: z.string().max(500).optional(),
 });
 export type TestDriveBooking = z.infer<typeof testDriveBookingSchema>;
 

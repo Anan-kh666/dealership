@@ -428,7 +428,7 @@ export default async function ModelDetailPage({
             </h2>
             <div className="flex flex-col gap-3 sm:flex-row">
               <BrandButton asChild variant="primary" size="lg">
-                <Link href="/test-drive">Schedule Test Drive</Link>
+                <Link href={`/test-drive?modelId=${model.id}`}>Schedule Test Drive</Link>
               </BrandButton>
               <BrandButton asChild variant="ghost-dark" size="lg">
                 <Link href={`/models/${model.slug}/build`}>Build Yours</Link>
