@@ -1,0 +1,24 @@
+{
+  "name": "@dealership/config",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./eslint": "./src/eslint.config.mjs",
+    "./tsconfig.base.json": "./src/tsconfig.base.json",
+    "./tsconfig.next.json": "./src/tsconfig.next.json",
+    "./tsconfig.node.json": "./src/tsconfig.node.json",
+    "./prettier": "./src/prettier.config.mjs",
+    "./tailwind-preset": "./src/tailwind-preset.css"
+  },
+  "files": ["src"],
+  "dependencies": {
+    "@eslint/js": "^9.14.0",
+    "eslint": "^9.14.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-react": "^7.37.2",
+    "eslint-plugin-react-hooks": "^5.0.0",
+    "globals": "^15.12.0",
+    "typescript-eslint": "^8.13.0"
+  }
+}

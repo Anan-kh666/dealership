@@ -1,0 +1,40 @@
+/*
+ * Shared Tailwind v4 preset for the dealership monorepo.
+ * Apps/packages import this and layer their own theme tokens on top.
+ *
+ * Tailwind v4 uses CSS-first configuration via `@theme` blocks.
+ */
+
+@theme {
+  /* Brand fonts wired up in apps via next/font CSS variables. */
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-fraunces), ui-serif, Georgia, serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, monospace;
+
+  /* Neutral surface palette — premium editorial look. */
+  --color-background: oklch(0.99 0 0);
+  --color-foreground: oklch(0.18 0.01 250);
+  --color-muted: oklch(0.96 0.005 250);
+  --color-muted-foreground: oklch(0.5 0.01 250);
+  --color-border: oklch(0.92 0.005 250);
+  --color-input: oklch(0.92 0.005 250);
+  --color-ring: oklch(0.7 0.05 250);
+
+  /* Surfaces. */
+  --color-card: oklch(1 0 0);
+  --color-card-foreground: oklch(0.18 0.01 250);
+
+  /* Primary action. */
+  --color-primary: oklch(0.18 0.01 250);
+  --color-primary-foreground: oklch(0.99 0 0);
+
+  /* Destructive. */
+  --color-destructive: oklch(0.55 0.22 27);
+  --color-destructive-foreground: oklch(0.99 0 0);
+
+  /* Radii. */
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+}
