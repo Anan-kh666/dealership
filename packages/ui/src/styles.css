@@ -1,2 +1,12 @@
 @import "tailwindcss";
 @import "@dealership/config/tailwind-preset";
+
+/*
+ * Tailwind v4 auto-detection does not reach into workspace packages by
+ * default. Without these @source directives, classes that only appear
+ * inside `packages/ui/src/components/*.tsx` (e.g. the BrandButton color
+ * variants like `bg-[var(--color-accent)]`) are silently dropped from
+ * the compiled stylesheet. Resolved relative to this file.
+ */
+@source "./components";
+@source "./lib";

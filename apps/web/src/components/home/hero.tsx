@@ -65,7 +65,7 @@ export function Hero(): React.ReactElement {
             <BrandButton asChild variant="primary" size="lg">
               <Link href="/models">Build Yours</Link>
             </BrandButton>
-            <BrandButton asChild variant="ghost-light" size="lg">
+            <BrandButton asChild variant="hero-only" size="lg">
               <Link href="/stock">Available Now</Link>
             </BrandButton>
           </motion.div>

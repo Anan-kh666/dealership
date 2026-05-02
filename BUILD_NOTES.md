@@ -144,9 +144,18 @@ Built alongside (not replacing) the existing shadcn primitives:
 - `components/section.tsx` — vertical rhythm wrapper. `variant` (default | warm
   | dark) and `spacing` (tight | default | loose).
 - `components/brand-button.tsx` — `BrandButton` with editorial-premium variants
-  (primary, secondary, ghost-light, ghost-dark) and sm/md/lg sizes. Built on
-  Radix Slot, uses brand tokens directly. The shadcn `Button` is left
-  untouched — it remains the unstyled foundation.
+  and sm/md/lg sizes. Built on Radix Slot, uses brand tokens directly. The
+  shadcn `Button` is left untouched — it remains the unstyled foundation.
+
+  **Variant visibility audit** (every variant must be legible against every
+  Section background unless flagged hero-only):
+
+  | Variant     | White bg | Warm bg | Dark bg | Notes |
+  | ---         | :---:    | :---:   | :---:   | --- |
+  | `primary`   | ✓        | ✓       | ✓       | Bronze fill, white text. |
+  | `secondary` | ✓        | ✓       | ✓       | Graphite fill, white text. |
+  | `ghost-dark`| ✓        | ✓       | ✗       | Graphite outline. Light backgrounds only. |
+  | `hero-only` | ✗        | ✗       | ✓       | White outline. Use only over a dark image hero or `Section variant="dark"`. |
 - `components/card.tsx` — base card + `CardHeader` / `CardTitle` /
   `CardContent`. Optional `interactive` flag for hover-lift.
 - `components/model-card.tsx` — composition for the model lineup. Accepts the
@@ -160,6 +169,13 @@ The `cn` import inside the new components drops the `.js` extension because
 Next.js webpack does not resolve it under `transpilePackages`. The existing
 shadcn primitives still use `.js` — leave them until they are actually
 imported by an app.
+
+**Tailwind v4 source scanning.** Tailwind v4's auto-detection does not reach
+into workspace packages by default — classes that only appear inside
+`packages/ui/src/components/*.tsx` (e.g. the BrandButton color variants)
+get silently dropped. `packages/ui/src/styles.css` adds explicit `@source`
+directives for `./components` and `./lib`. If you add another source folder
+to the package, add a matching `@source` line.
 
 ### Homepage — `apps/web/src/app/(public)/page.tsx`
 
