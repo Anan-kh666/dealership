@@ -152,8 +152,8 @@ export const blogPosts: BlogPost[] = [
     date: "April 22, 2026",
     readTime: "6 min read",
     image:
-      "https://images.unsplash.com/photo-1606017521-bc7c4c1c3d40?w=1200&q=85&auto=format&fit=crop",
-    alt: "Lumen EV charging cable plugged in at dusk",
+      "https://images.unsplash.com/photo-1671785253964-bdb43087ed99?w=1200&q=85&auto=format&fit=crop",
+    alt: "White electric vehicle connected to a public charging station",
   },
   {
     slug: "first-1000-km-aurora-suv",
@@ -163,8 +163,8 @@ export const blogPosts: BlogPost[] = [
     date: "April 9, 2026",
     readTime: "8 min read",
     image:
-      "https://images.unsplash.com/photo-1568844293986-ca9c5c1bc2e8?w=1200&q=85&auto=format&fit=crop",
-    alt: "Aurora SUV parked at a Penang seafront",
+      "https://images.unsplash.com/photo-1562705841-c4934bb2b31b?w=1200&q=85&auto=format&fit=crop",
+    alt: "Black SUV travelling along an open dirt road at first light",
   },
   {
     slug: "service-without-the-surprise",
@@ -174,8 +174,8 @@ export const blogPosts: BlogPost[] = [
     date: "March 28, 2026",
     readTime: "4 min read",
     image:
-      "https://images.unsplash.com/photo-1632823469850-1b7b1e8b7e2d?w=1200&q=85&auto=format&fit=crop",
-    alt: "Service technician checking under the hood at the dealership",
+      "https://images.unsplash.com/photo-1487754180451-c456f719a1fc?w=1200&q=85&auto=format&fit=crop",
+    alt: "Technician's hands topping up engine oil during a service inspection",
   },
 ];
 
