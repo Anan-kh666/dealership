@@ -3,10 +3,31 @@ import Link from "next/link";
 import { Container } from "@dealership/ui/components/container";
 import { Section } from "@dealership/ui/components/section";
 import { ModelCard } from "@dealership/ui/components/model-card";
+import { prisma, BodyType } from "@dealership/db";
 import { Reveal } from "@/components/reveal";
-import { lineup } from "@/data/placeholders";
+import { formatPrice } from "@/lib/format";
 
-export function Lineup(): React.ReactElement {
+function bodyTypeLabel(b: BodyType): string {
+  switch (b) {
+    case BodyType.SEDAN:
+      return "Sedan";
+    case BodyType.SUV:
+      return "Family SUV";
+    case BodyType.HATCHBACK:
+      return "Crossover";
+    case BodyType.COUPE:
+      return "Flagship";
+    default:
+      return b;
+  }
+}
+
+export async function Lineup(): Promise<React.ReactElement> {
+  const models = await prisma.model.findMany({
+    where: { isActive: true },
+    orderBy: [{ displayOrder: "asc" }, { startingPrice: "asc" }],
+  });
+
   return (
     <Section spacing="default">
       <Container>
@@ -32,18 +53,18 @@ export function Lineup(): React.ReactElement {
       {/* Mobile: horizontal snap-scroll */}
       <div className="md:hidden">
         <ul className="flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-4 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          {lineup.map((m) => (
-            <li key={m.slug} className="min-w-[80vw] shrink-0 snap-start">
+          {models.map((m) => (
+            <li key={m.id} className="min-w-[80vw] shrink-0 snap-start">
               <ModelCard
                 linkComponent={Link}
                 href={`/models/${m.slug}`}
                 name={m.name}
-                bodyType={m.bodyType}
-                startingPrice={m.startingPrice}
+                bodyType={bodyTypeLabel(m.bodyType)}
+                startingPrice={formatPrice(m.startingPrice.toString(), m.currency)}
                 image={
                   <Image
                     src={m.heroImage}
-                    alt={m.alt}
+                    alt={`${m.name} — ${bodyTypeLabel(m.bodyType).toLowerCase()}`}
                     fill
                     sizes="80vw"
                     className="object-cover"
@@ -58,19 +79,19 @@ export function Lineup(): React.ReactElement {
       {/* Tablet/desktop: grid */}
       <Container className="hidden md:block">
         <ul className="grid grid-cols-2 gap-x-6 gap-y-12 lg:grid-cols-3">
-          {lineup.map((m, idx) => (
-            <li key={m.slug}>
+          {models.map((m, idx) => (
+            <li key={m.id}>
               <Reveal delay={Math.min(idx, 3) * 0.06}>
                 <ModelCard
                   linkComponent={Link}
                   href={`/models/${m.slug}`}
                   name={m.name}
-                  bodyType={m.bodyType}
-                  startingPrice={m.startingPrice}
+                  bodyType={bodyTypeLabel(m.bodyType)}
+                  startingPrice={formatPrice(m.startingPrice.toString(), m.currency)}
                   image={
                     <Image
                       src={m.heroImage}
-                      alt={m.alt}
+                      alt={`${m.name} — ${bodyTypeLabel(m.bodyType).toLowerCase()}`}
                       fill
                       sizes="(min-width: 1024px) 33vw, 50vw"
                       className="object-cover"
