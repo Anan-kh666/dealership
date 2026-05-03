@@ -33,7 +33,29 @@ export function StepReview({
   onBack: () => void;
   onJump: (step: TradeInStep) => void;
 }): React.ReactElement {
-  const s = useTradeInStore();
+  const vin = useTradeInStore((s) => s.vin);
+  const make = useTradeInStore((s) => s.make);
+  const model = useTradeInStore((s) => s.model);
+  const year = useTradeInStore((s) => s.year);
+  const trim = useTradeInStore((s) => s.trim);
+  const mileage = useTradeInStore((s) => s.mileage);
+  const condition = useTradeInStore((s) => s.condition);
+  const serviceHistory = useTradeInStore((s) => s.serviceHistory);
+  const serviceLocation = useTradeInStore((s) => s.serviceLocation);
+  const accidentHistory = useTradeInStore((s) => s.accidentHistory);
+  const accidentNote = useTradeInStore((s) => s.accidentNote);
+  const modifications = useTradeInStore((s) => s.modifications);
+  const modificationsNote = useTradeInStore((s) => s.modificationsNote);
+  const photos = useTradeInStore((s) => s.photos);
+  const photosSkipped = useTradeInStore((s) => s.photosSkipped);
+  const contactName = useTradeInStore((s) => s.contactName);
+  const contactEmail = useTradeInStore((s) => s.contactEmail);
+  const contactPhone = useTradeInStore((s) => s.contactPhone);
+  const preferredContactMethod = useTradeInStore(
+    (s) => s.preferredContactMethod,
+  );
+  const bestTimeToCall = useTradeInStore((s) => s.bestTimeToCall);
+  const configurationId = useTradeInStore((s) => s.configurationId);
   const setSubmitted = useTradeInStore((x) => x.setSubmitted);
 
   const [consent, setConsent] = useState(false);
@@ -45,27 +67,27 @@ export function StepReview({
     setSubmitting(true);
     try {
       const body = {
-        vin: s.vin ?? undefined,
-        make: s.make ?? "",
-        model: s.model ?? "",
-        year: s.year ?? new Date().getFullYear(),
-        trim: s.trim ?? undefined,
-        mileage: s.mileage ?? 0,
-        condition: s.condition ?? "GOOD",
-        serviceHistory: s.serviceHistory ?? false,
-        serviceLocation: s.serviceLocation ?? undefined,
-        accidentHistory: s.accidentHistory ?? false,
-        accidentNote: s.accidentNote ?? undefined,
-        modifications: s.modifications ?? false,
-        modificationsNote: s.modificationsNote ?? undefined,
-        photos: s.photos.map((p) => p.publicUrl),
-        photosSkipped: s.photosSkipped,
-        contactName: s.contactName ?? "",
-        contactEmail: s.contactEmail ?? "",
-        contactPhone: s.contactPhone ?? "",
-        preferredContactMethod: s.preferredContactMethod ?? "PHONE",
-        bestTimeToCall: s.bestTimeToCall ?? "ANYTIME",
-        configurationId: s.configurationId ?? undefined,
+        vin: vin ?? undefined,
+        make: make ?? "",
+        model: model ?? "",
+        year: year ?? new Date().getFullYear(),
+        trim: trim ?? undefined,
+        mileage: mileage ?? 0,
+        condition: condition ?? "GOOD",
+        serviceHistory: serviceHistory ?? false,
+        serviceLocation: serviceLocation ?? undefined,
+        accidentHistory: accidentHistory ?? false,
+        accidentNote: accidentNote ?? undefined,
+        modifications: modifications ?? false,
+        modificationsNote: modificationsNote ?? undefined,
+        photos: photos.map((p) => p.publicUrl),
+        photosSkipped,
+        contactName: contactName ?? "",
+        contactEmail: contactEmail ?? "",
+        contactPhone: contactPhone ?? "",
+        preferredContactMethod: preferredContactMethod ?? "PHONE",
+        bestTimeToCall: bestTimeToCall ?? "ANYTIME",
+        configurationId: configurationId ?? undefined,
         consent: true as const,
       };
       const res = await fetch(`${API_URL}/public/trade-ins`, {
@@ -85,7 +107,7 @@ export function StepReview({
     }
   };
 
-  const conditionLabel = s.condition ? CONDITION_LABELS[s.condition] : "—";
+  const conditionLabel = condition ? CONDITION_LABELS[condition] : "—";
 
   return (
     <div>
@@ -98,29 +120,29 @@ export function StepReview({
           title="Vehicle"
           onEdit={() => onJump(1)}
         >
-          {s.vin && <Row label="VIN" value={s.vin} />}
+          {vin && <Row label="VIN" value={vin} />}
           <Row
             label="Make / model"
-            value={[s.make, s.model].filter(Boolean).join(" ") || "—"}
+            value={[make, model].filter(Boolean).join(" ") || "—"}
           />
-          <Row label="Year" value={s.year ? String(s.year) : "—"} />
-          {s.trim && <Row label="Trim" value={s.trim} />}
+          <Row label="Year" value={year ? String(year) : "—"} />
+          {trim && <Row label="Trim" value={trim} />}
         </SummaryCard>
 
         <SummaryCard title="Condition" onEdit={() => onJump(2)}>
           <Row
             label="Mileage"
-            value={s.mileage != null ? `${s.mileage.toLocaleString("en-MY")} km` : "—"}
+            value={mileage != null ? `${mileage.toLocaleString("en-MY")} km` : "—"}
           />
           <Row label="Condition" value={conditionLabel ?? "—"} />
           <Row
             label="Service history"
             value={
-              s.serviceHistory === true
-                ? s.serviceLocation
-                  ? `Yes — ${s.serviceLocation}`
+              serviceHistory === true
+                ? serviceLocation
+                  ? `Yes — ${serviceLocation}`
                   : "Yes"
-                : s.serviceHistory === false
+                : serviceHistory === false
                   ? "No"
                   : "—"
             }
@@ -128,11 +150,11 @@ export function StepReview({
           <Row
             label="Accident history"
             value={
-              s.accidentHistory === true
-                ? s.accidentNote
-                  ? `Yes — ${s.accidentNote}`
+              accidentHistory === true
+                ? accidentNote
+                  ? `Yes — ${accidentNote}`
                   : "Yes"
-                : s.accidentHistory === false
+                : accidentHistory === false
                   ? "No"
                   : "—"
             }
@@ -140,11 +162,11 @@ export function StepReview({
           <Row
             label="Modifications"
             value={
-              s.modifications === true
-                ? s.modificationsNote
-                  ? `Yes — ${s.modificationsNote}`
+              modifications === true
+                ? modificationsNote
+                  ? `Yes — ${modificationsNote}`
                   : "Yes"
-                : s.modifications === false
+                : modifications === false
                   ? "No"
                   : "—"
             }
@@ -152,17 +174,17 @@ export function StepReview({
         </SummaryCard>
 
         <SummaryCard title="Photos" onEdit={() => onJump(3)}>
-          {s.photosSkipped ? (
+          {photosSkipped ? (
             <p className="text-sm text-[var(--color-neutral-700)]">
               Skipped — staff will follow up to collect photos directly.
             </p>
-          ) : s.photos.length === 0 ? (
+          ) : photos.length === 0 ? (
             <p className="text-sm text-[var(--color-neutral-700)]">
               No photos uploaded.
             </p>
           ) : (
             <ul className="grid grid-cols-4 gap-2 sm:grid-cols-6">
-              {s.photos.map((p) => (
+              {photos.map((p) => (
                 <li
                   key={p.id}
                   className="aspect-square overflow-hidden rounded-md border border-[var(--color-neutral-200)] bg-[var(--color-neutral-100)]"
@@ -180,22 +202,22 @@ export function StepReview({
         </SummaryCard>
 
         <SummaryCard title="Contact" onEdit={() => onJump(4)}>
-          <Row label="Name" value={s.contactName ?? "—"} />
-          <Row label="Email" value={s.contactEmail ?? "—"} />
-          <Row label="Phone" value={s.contactPhone ?? "—"} />
+          <Row label="Name" value={contactName ?? "—"} />
+          <Row label="Email" value={contactEmail ?? "—"} />
+          <Row label="Phone" value={contactPhone ?? "—"} />
           <Row
             label="Preferred"
             value={
-              s.preferredContactMethod
-                ? (CONTACT_METHOD_LABELS[s.preferredContactMethod] ?? "—")
+              preferredContactMethod
+                ? (CONTACT_METHOD_LABELS[preferredContactMethod] ?? "—")
                 : "—"
             }
           />
           <Row
             label="Best time"
             value={
-              s.bestTimeToCall
-                ? (BEST_TIME_LABELS[s.bestTimeToCall] ?? "—")
+              bestTimeToCall
+                ? (BEST_TIME_LABELS[bestTimeToCall] ?? "—")
                 : "—"
             }
           />

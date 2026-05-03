@@ -62,16 +62,14 @@ const YEARS = Array.from({ length: CURRENT_YEAR - 2000 + 1 }, (_, i) =>
 );
 
 export function StepVehicle({ onNext }: { onNext: () => void }): React.ReactElement {
-  const initial = useTradeInStore((s) => ({
-    vin: s.vin,
-    make: s.make,
-    model: s.model,
-    year: s.year,
-    trim: s.trim,
-  }));
+  const initialVin = useTradeInStore((s) => s.vin);
+  const initialMake = useTradeInStore((s) => s.make);
+  const initialModel = useTradeInStore((s) => s.model);
+  const initialYear = useTradeInStore((s) => s.year);
+  const initialTrim = useTradeInStore((s) => s.trim);
   const patch = useTradeInStore((s) => s.patch);
 
-  const [tab, setTab] = useState<"vin" | "manual">(initial.vin ? "vin" : "manual");
+  const [tab, setTab] = useState<"vin" | "manual">(initialVin ? "vin" : "manual");
 
   return (
     <div>
@@ -108,7 +106,7 @@ export function StepVehicle({ onNext }: { onNext: () => void }): React.ReactElem
       <div className="mt-8">
         {tab === "vin" ? (
           <VinForm
-            initialVin={initial.vin}
+            initialVin={initialVin}
             onSubmit={(vin) => {
               patch({ vin });
               onNext();
@@ -117,10 +115,10 @@ export function StepVehicle({ onNext }: { onNext: () => void }): React.ReactElem
         ) : (
           <ManualForm
             initial={{
-              make: initial.make,
-              model: initial.model,
-              year: initial.year,
-              trim: initial.trim,
+              make: initialMake,
+              model: initialModel,
+              year: initialYear,
+              trim: initialTrim,
             }}
             onSubmit={(v) => {
               patch({

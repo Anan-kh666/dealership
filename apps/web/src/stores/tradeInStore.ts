@@ -47,6 +47,10 @@ interface TradeInState {
 
   // Submission
   submitted: { id: string; reference: string } | null;
+
+  // Hydration flag — set by `onRehydrateStorage` so consumers can avoid
+  // SSR/CSR mismatch when reading sessionStorage-backed state.
+  hasHydrated: boolean;
 }
 
 interface TradeInActions {
@@ -59,9 +63,10 @@ interface TradeInActions {
   setPhotosSkipped: (skipped: boolean) => void;
   setSubmitted: (s: { id: string; reference: string }) => void;
   reset: () => void;
+  setHydrated: () => void;
 }
 
-const initialState: TradeInState = {
+const initialState: Omit<TradeInState, "hasHydrated"> = {
   step: 1,
   configurationId: null,
   vin: null,
@@ -91,6 +96,7 @@ export const useTradeInStore = create<TradeInState & TradeInActions>()(
   persist(
     (set) => ({
       ...initialState,
+      hasHydrated: false,
       setStep: (step) => set({ step }),
       setConfigurationId: (configurationId) => set({ configurationId }),
       patch: (p) => set(p),
@@ -112,11 +118,43 @@ export const useTradeInStore = create<TradeInState & TradeInActions>()(
         }),
       setPhotosSkipped: (photosSkipped) => set({ photosSkipped }),
       setSubmitted: (submitted) => set({ submitted }),
-      reset: () => set(initialState),
+      reset: () => set({ ...initialState }),
+      setHydrated: () => set({ hasHydrated: true }),
     }),
     {
       name: "trade-in-flow",
-      storage: createJSONStorage(() => sessionStorage),
+      storage: createJSONStorage(() =>
+        typeof window === "undefined"
+          ? (undefined as unknown as Storage)
+          : window.sessionStorage,
+      ),
+      partialize: (s) => ({
+        step: s.step,
+        configurationId: s.configurationId,
+        vin: s.vin,
+        make: s.make,
+        model: s.model,
+        year: s.year,
+        trim: s.trim,
+        mileage: s.mileage,
+        condition: s.condition,
+        serviceHistory: s.serviceHistory,
+        serviceLocation: s.serviceLocation,
+        accidentHistory: s.accidentHistory,
+        accidentNote: s.accidentNote,
+        modifications: s.modifications,
+        modificationsNote: s.modificationsNote,
+        photos: s.photos,
+        photosSkipped: s.photosSkipped,
+        contactName: s.contactName,
+        contactEmail: s.contactEmail,
+        contactPhone: s.contactPhone,
+        preferredContactMethod: s.preferredContactMethod,
+        bestTimeToCall: s.bestTimeToCall,
+      }),
+      onRehydrateStorage: () => (state) => {
+        state?.setHydrated();
+      },
     },
   ),
 );

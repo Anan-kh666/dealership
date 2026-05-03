@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { ProgressIndicator } from "./progress";
 import { StepVehicle } from "./step-vehicle";
@@ -11,27 +11,30 @@ import { StepReview } from "./step-review";
 import { Success } from "./success";
 import { useTradeInStore, type TradeInStep } from "@/stores/tradeInStore";
 
-export function TradeInFlow(): React.ReactElement | null {
+export function TradeInFlow(): React.ReactElement {
   const searchParams = useSearchParams();
   const setConfigurationId = useTradeInStore((s) => s.setConfigurationId);
   const step = useTradeInStore((s) => s.step);
   const setStep = useTradeInStore((s) => s.setStep);
   const submitted = useTradeInStore((s) => s.submitted);
   const configurationIdInStore = useTradeInStore((s) => s.configurationId);
-
-  const [hydrated, setHydrated] = useState(false);
+  const hasHydrated = useTradeInStore((s) => s.hasHydrated);
 
   useEffect(() => {
-    setHydrated(true);
+    if (!hasHydrated) return;
     const cfg = searchParams.get("configurationId");
     if (cfg && /^[a-z0-9]{20,32}$/i.test(cfg)) {
       setConfigurationId(cfg);
     }
-  }, [searchParams, setConfigurationId]);
+  }, [hasHydrated, searchParams, setConfigurationId]);
 
-  if (!hydrated) {
-    // Avoid SSR/CSR mismatch from sessionStorage-backed state.
-    return <div className="min-h-[40vh]" aria-hidden />;
+  if (!hasHydrated) {
+    return (
+      <div
+        aria-hidden
+        className="min-h-[480px] animate-pulse rounded-[var(--radius-lg)] bg-[var(--color-neutral-100)]"
+      />
+    );
   }
 
   if (submitted) {

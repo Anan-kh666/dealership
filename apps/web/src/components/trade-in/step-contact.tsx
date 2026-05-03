@@ -42,7 +42,11 @@ export function StepContact({
   onNext: () => void;
   onBack: () => void;
 }): React.ReactElement {
-  const s = useTradeInStore();
+  const initialName = useTradeInStore((s) => s.contactName);
+  const initialEmail = useTradeInStore((s) => s.contactEmail);
+  const initialPhone = useTradeInStore((s) => s.contactPhone);
+  const initialMethod = useTradeInStore((s) => s.preferredContactMethod);
+  const initialBestTime = useTradeInStore((s) => s.bestTimeToCall);
   const patch = useTradeInStore((x) => x.patch);
 
   const {
@@ -55,11 +59,11 @@ export function StepContact({
     resolver: zodResolver(schema),
     mode: "onChange",
     defaultValues: {
-      contactName: s.contactName ?? "",
-      contactEmail: s.contactEmail ?? "",
-      contactPhone: s.contactPhone ?? "",
-      preferredContactMethod: s.preferredContactMethod ?? "PHONE",
-      bestTimeToCall: s.bestTimeToCall ?? "ANYTIME",
+      contactName: initialName ?? "",
+      contactEmail: initialEmail ?? "",
+      contactPhone: initialPhone ?? "",
+      preferredContactMethod: initialMethod ?? "PHONE",
+      bestTimeToCall: initialBestTime ?? "ANYTIME",
     },
   });
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Label } from "@dealership/ui/components/label";
 import { BrandButton } from "@dealership/ui/components/brand-button";
 import { useTradeInStore, type TradeInCondition } from "@/stores/tradeInStore";
@@ -61,28 +61,41 @@ export function StepCondition({
   onNext: () => void;
   onBack: () => void;
 }): React.ReactElement {
-  const s = useTradeInStore();
+  const initialMileage = useTradeInStore((s) => s.mileage);
+  const initialCondition = useTradeInStore((s) => s.condition);
+  const initialServiceHistory = useTradeInStore((s) => s.serviceHistory);
+  const initialServiceLocation = useTradeInStore((s) => s.serviceLocation);
+  const initialAccidentHistory = useTradeInStore((s) => s.accidentHistory);
+  const initialAccidentNote = useTradeInStore((s) => s.accidentNote);
+  const initialModifications = useTradeInStore((s) => s.modifications);
+  const initialModificationsNote = useTradeInStore(
+    (s) => s.modificationsNote,
+  );
   const patch = useTradeInStore((x) => x.patch);
 
   const [mileageStr, setMileageStr] = useState<string>(
-    s.mileage != null ? s.mileage.toLocaleString("en-MY") : "",
+    initialMileage != null ? initialMileage.toLocaleString("en-MY") : "",
   );
-  const [condition, setCondition] = useState<TradeInCondition | null>(s.condition);
+  const [condition, setCondition] = useState<TradeInCondition | null>(
+    initialCondition,
+  );
   const [serviceHistory, setServiceHistory] = useState<boolean | null>(
-    s.serviceHistory,
+    initialServiceHistory,
   );
   const [serviceLocation, setServiceLocation] = useState<string>(
-    s.serviceLocation ?? "",
+    initialServiceLocation ?? "",
   );
   const [accidentHistory, setAccidentHistory] = useState<boolean | null>(
-    s.accidentHistory,
+    initialAccidentHistory,
   );
-  const [accidentNote, setAccidentNote] = useState<string>(s.accidentNote ?? "");
+  const [accidentNote, setAccidentNote] = useState<string>(
+    initialAccidentNote ?? "",
+  );
   const [modifications, setModifications] = useState<boolean | null>(
-    s.modifications,
+    initialModifications,
   );
   const [modificationsNote, setModificationsNote] = useState<string>(
-    s.modificationsNote ?? "",
+    initialModificationsNote ?? "",
   );
 
   const mileageNumber = Number(mileageStr.replace(/\D/g, ""));
@@ -95,8 +108,7 @@ export function StepCondition({
     accidentHistory !== null &&
     modifications !== null;
 
-  useEffect(() => {
-    // keep store in sync as user types so back/forward preserves state
+  function persist(): void {
     patch({
       mileage: mileageStr ? mileageNumber : null,
       condition,
@@ -107,17 +119,7 @@ export function StepCondition({
       modifications,
       modificationsNote: modificationsNote || null,
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    mileageStr,
-    condition,
-    serviceHistory,
-    serviceLocation,
-    accidentHistory,
-    accidentNote,
-    modifications,
-    modificationsNote,
-  ]);
+  }
 
   return (
     <div>
@@ -261,7 +263,17 @@ export function StepCondition({
         }
       />
 
-      <NavRow onBack={onBack} onNext={onNext} nextDisabled={!isValid} />
+      <NavRow
+        onBack={() => {
+          persist();
+          onBack();
+        }}
+        onNext={() => {
+          persist();
+          onNext();
+        }}
+        nextDisabled={!isValid}
+      />
     </div>
   );
 }
