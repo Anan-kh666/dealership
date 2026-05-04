@@ -27,7 +27,7 @@ import { daysUntil, formatBodyType, formatFuel, statusToCardBadge } from "@/lib/
 import { StockGallery, type StockGalleryImage } from "@/components/stock/stock-gallery";
 import { CtaCluster } from "@/components/stock/cta-cluster";
 import { DetailTabs } from "@/components/stock/detail-tabs";
-import { FinanceWidgetPlaceholder } from "@/components/stock/finance-widget-placeholder";
+import { FinanceWidget } from "@/components/finance/finance-widget";
 
 export const dynamic = "force-dynamic";
 
@@ -269,10 +269,14 @@ After-sales: priority service booking at our authorised centres in Petaling Jaya
         </Container>
       </Section>
 
-      {/* Finance widget placeholder */}
+      {/* Finance widget */}
       <Section spacing="default">
         <Container>
-          <FinanceWidgetPlaceholder stockUnitId={unit.id} estimatedMonthly={monthly} />
+          <FinanceWidget
+            vehiclePrice={Number(unit.totalPrice)}
+            vehicleId={unit.id}
+            variant="card"
+          />
         </Container>
       </Section>
 
