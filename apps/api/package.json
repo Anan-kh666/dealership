@@ -27,6 +27,7 @@
     "fastify-type-provider-zod": "^4.0.2",
     "ics": "^3.8.1",
     "nanoid": "^5.0.9",
+    "nodemailer": "^6.9.16",
     "pino": "^9.5.0",
     "pino-pretty": "^13.0.0",
     "react": "^19.0.0",
@@ -36,6 +37,7 @@
   "devDependencies": {
     "@dealership/config": "workspace:*",
     "@types/node": "^22.10.0",
+    "@types/nodemailer": "^6.4.17",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "tsx": "^4.19.2",
