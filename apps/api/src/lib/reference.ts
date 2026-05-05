@@ -13,3 +13,12 @@ export function tradeInIdSuffixFromReference(reference: string): string | null {
   if (!m) return null;
   return m[1]!.toLowerCase();
 }
+
+/**
+ * Financing application reference: `FA-` + the last 6 characters of the cuid.
+ * Stored on the row itself (`referenceNumber`) so admin can search by it.
+ */
+export function financingReferenceFromId(id: string): string {
+  return `FA-${id.slice(-6).toUpperCase()}`;
+}
+

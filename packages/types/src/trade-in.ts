@@ -77,12 +77,13 @@ export const tradeInFullSubmissionSchema = z
   });
 export type TradeInFullSubmission = z.infer<typeof tradeInFullSubmissionSchema>;
 
-export const PRESIGN_PURPOSES = ["trade-in"] as const;
+export const PRESIGN_PURPOSES = ["trade-in", "financing"] as const;
 export const PRESIGN_CONTENT_TYPES = [
   "image/jpeg",
   "image/png",
   "image/webp",
   "image/heic",
+  "application/pdf",
 ] as const;
 export const PRESIGN_MAX_BYTES = 10 * 1024 * 1024;
 

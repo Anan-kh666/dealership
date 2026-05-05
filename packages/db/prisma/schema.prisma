@@ -207,24 +207,64 @@ model TestDrive {
 }
 
 model FinanceApplication {
-  id              String         @id @default(cuid())
-  configurationId String?
-  configuration   Configuration? @relation(fields: [configurationId], references: [id])
-  stockUnitId     String?
-  stockUnit       StockUnit?     @relation(fields: [stockUnitId], references: [id])
-  userId          String?
-  user            User?          @relation(fields: [userId], references: [id])
-  applicantName   String
-  email           String
-  phone           String
-  monthlyIncome   Decimal        @db.Decimal(10, 2)
-  employmentType  String
-  loanAmount      Decimal        @db.Decimal(12, 2)
-  termMonths      Int
-  downPayment     Decimal        @db.Decimal(12, 2)
-  status          AppStatus      @default(SUBMITTED)
-  notes           String?
-  createdAt       DateTime       @default(now())
+  id                 String         @id @default(cuid())
+  referenceNumber    String         @unique
+  configurationId    String?
+  configuration      Configuration? @relation(fields: [configurationId], references: [id])
+  stockUnitId        String?
+  stockUnit          StockUnit?     @relation(fields: [stockUnitId], references: [id])
+  userId             String?
+  user               User?          @relation(fields: [userId], references: [id])
+
+  // Vehicle context (free-text label captured at submit so we can show it back
+  // to the customer even if the linked stock unit is later sold/removed).
+  vehicleLabel       String?
+  vehiclePrice       Decimal        @db.Decimal(12, 2)
+
+  // Loan terms
+  loanAmount         Decimal        @db.Decimal(12, 2)
+  downPayment        Decimal        @db.Decimal(12, 2)
+  downPaymentPercent Decimal        @db.Decimal(5, 2)
+  tenureYears        Int
+  termMonths         Int
+  interestRatePct    Decimal        @db.Decimal(5, 2)
+  estimatedMonthly   Decimal        @db.Decimal(12, 2)
+
+  // Personal — applicantName/email/phone are kept on the original schema for
+  // backward-compat ("phone" is the mobile number).
+  applicantName      String
+  email              String
+  phone              String
+  icNumber           String
+  dateOfBirth        DateTime
+  nationality        String
+  maritalStatus      String
+  addressStreet      String
+  addressCity        String
+  addressState       String
+  addressPostcode    String
+
+  // Employment & income
+  employmentType     String
+  employerName       String
+  position           String
+  monthlyIncome      Decimal        @db.Decimal(12, 2)
+  monthlyCommitments Decimal?       @db.Decimal(12, 2)
+  yearsEmployed      Decimal        @db.Decimal(5, 2)
+
+  // Documents — uploaded via R2 presign; nullable so the step is skippable.
+  icFrontUrl         String?
+  icBackUrl          String?
+  payslipUrls        String[]
+  bankStatementUrls  String[]
+  documentsSkipped   Boolean        @default(false)
+
+  status             AppStatus      @default(SUBMITTED)
+  notes              String?
+  createdAt          DateTime       @default(now())
+  updatedAt          DateTime       @updatedAt
+
+  @@index([status, createdAt])
 }
 
 model TradeIn {

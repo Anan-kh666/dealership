@@ -6,6 +6,7 @@ import { inquiriesPublicRoutes } from "./inquiries.js";
 import { testDrivesPublicRoutes } from "./test-drives.js";
 import { uploadsPublicRoutes } from "./uploads.js";
 import { tradeInsPublicRoutes } from "./trade-ins.js";
+import { financingPublicRoutes } from "./financing.js";
 
 /** Public, unauthenticated routes (model browsing, inventory, test drives). */
 export const publicRoutes: FastifyPluginAsyncZod = async (server) => {
@@ -20,4 +21,5 @@ export const publicRoutes: FastifyPluginAsyncZod = async (server) => {
   await server.register(testDrivesPublicRoutes);
   await server.register(uploadsPublicRoutes);
   await server.register(tradeInsPublicRoutes);
+  await server.register(financingPublicRoutes);
 };

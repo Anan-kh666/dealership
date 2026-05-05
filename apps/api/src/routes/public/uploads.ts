@@ -11,6 +11,7 @@ const EXT_BY_TYPE: Record<string, string> = {
   "image/png": "png",
   "image/webp": "webp",
   "image/heic": "heic",
+  "application/pdf": "pdf",
 };
 
 const presignLimiter = createRateLimiter({
