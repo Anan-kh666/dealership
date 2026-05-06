@@ -25,7 +25,8 @@ export const ModelCard = React.forwardRef<HTMLAnchorElement, ModelCardProps>(
     },
     ref,
   ) => {
-    const Link = (linkComponent ?? "a") as React.ElementType;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const Link: any = linkComponent ?? "a";
     return (
       <Link
         ref={ref}

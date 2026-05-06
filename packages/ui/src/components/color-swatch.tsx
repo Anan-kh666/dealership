@@ -20,7 +20,8 @@ export interface ColorSwatchProps
 export const ColorSwatch = React.forwardRef<HTMLButtonElement, ColorSwatchProps>(
   ({ hex, name, selected = false, size = "md", className, onClick, ...rest }, ref) => {
     const interactive = typeof onClick === "function";
-    const Component = (interactive ? "button" : "span") as React.ElementType;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const Component: any = interactive ? "button" : "span";
     return (
       <Component
         ref={ref}

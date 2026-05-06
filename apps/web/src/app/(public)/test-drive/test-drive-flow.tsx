@@ -45,6 +45,8 @@ export interface TestDriveFlowProps {
   prefill: PrefilledVehicle | null;
   models: ModelOption[];
   stockUnits: StockOption[];
+  /** Pre-built spec summary from the configurator's `&config=` param. */
+  configNotes?: string | null;
 }
 
 export interface SuccessPayload {
@@ -60,6 +62,7 @@ export function TestDriveFlow({
   prefill,
   models,
   stockUnits,
+  configNotes,
 }: TestDriveFlowProps): React.ReactElement {
   const step = useTestDriveStore((s) => s.step);
   const vehicle = useTestDriveStore((s) => s.vehicle);
@@ -67,6 +70,23 @@ export function TestDriveFlow({
   const selectVehicle = useTestDriveStore((s) => s.selectVehicle);
   const clearVehicle = useTestDriveStore((s) => s.clearVehicle);
   const hasHydrated = useTestDriveStore((s) => s.hasHydrated);
+  const detailsNotes = useTestDriveStore((s) => s.details.notes);
+  const setDetails = useTestDriveStore((s) => s.setDetails);
+
+  // Apply configurator-derived spec summary to the notes field once on
+  // hydration, but only if the user hasn't already typed something.
+  const configAppliedRef = useRef(false);
+  useEffect(() => {
+    if (!hasHydrated || configAppliedRef.current) return;
+    if (!configNotes) {
+      configAppliedRef.current = true;
+      return;
+    }
+    if (!detailsNotes || detailsNotes.trim().length === 0) {
+      setDetails({ notes: configNotes });
+    }
+    configAppliedRef.current = true;
+  }, [hasHydrated, configNotes, detailsNotes, setDetails]);
 
   const [success, setSuccess] = React.useState<SuccessPayload | null>(null);
   const headingRef = useRef<HTMLHeadingElement | null>(null);

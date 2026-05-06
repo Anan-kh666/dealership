@@ -15,6 +15,9 @@ dist/
 build/
 out/
 *.tsbuildinfo
+# The configurator route folder is genuinely named `build/` — re-include it.
+!apps/web/src/app/**/build/
+!apps/web/src/app/**/build/**
 
 # Generated Prisma client
 packages/db/src/generated/
