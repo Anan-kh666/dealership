@@ -75,7 +75,7 @@ export function TrimStep({
         })}
       </ul>
 
-      <div className="flex justify-end pt-2">
+      <div className="hidden">
         <BrandButton variant="primary" size="lg" onClick={onContinue}>
           Continue
         </BrandButton>

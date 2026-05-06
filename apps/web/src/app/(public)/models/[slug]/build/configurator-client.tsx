@@ -253,10 +253,10 @@ export function ConfiguratorClient({
       </div>
 
       {/* Mobile: stacked. Desktop: split halves. */}
-      <div className="mx-auto flex max-w-[1400px] flex-col lg:flex-row lg:gap-8 lg:px-6 lg:pt-8">
+      <div className="mx-auto flex max-w-[1400px] flex-col lg:flex-row lg:items-start lg:gap-8 lg:px-6 lg:pt-8">
         {/* Preview */}
-        <div className="relative h-[42vh] w-full lg:sticky lg:top-24 lg:h-[calc(100vh-7rem)] lg:w-1/2 lg:self-start">
-          <div className="absolute inset-0 lg:rounded-[var(--radius-lg)] lg:overflow-hidden">
+        <div className="relative h-[42vh] w-full lg:h-auto lg:w-1/2">
+          <div className="relative h-full w-full lg:sticky lg:top-24 lg:h-[calc(100vh-7rem)] lg:rounded-[var(--radius-lg)] lg:overflow-hidden">
             {hasHydrated ? (
               <PreviewCanvas
                 bodyHex={exteriorHex}
@@ -342,14 +342,16 @@ export function ConfiguratorClient({
         </div>
       </div>
 
-      {/* Sticky total bar — mobile only (desktop has it inline on summary, plus it's visible on every page anyway) */}
-      <TotalBar
-        total={totalLabel}
-        showContinue={!isSummary && hasHydrated}
-        showBack={step > 1 && hasHydrated}
-        onContinue={goNext}
-        onBack={goBack}
-      />
+      {/* Sticky total bar — hidden on summary, where the step has its own price + CTAs */}
+      {!isSummary && hasHydrated ? (
+        <TotalBar
+          total={totalLabel}
+          showContinue={true}
+          showBack={step > 1}
+          onContinue={goNext}
+          onBack={goBack}
+        />
+      ) : null}
     </div>
   );
 }

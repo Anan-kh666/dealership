@@ -69,7 +69,7 @@ export function ExteriorStep({
         </p>
       ) : null}
 
-      <div className="flex items-center justify-between pt-2">
+      <div className="hidden">
         <BrandButton variant="ghost-dark" size="md" onClick={onBack}>
           Back
         </BrandButton>
