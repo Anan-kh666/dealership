@@ -26,7 +26,8 @@ export interface SectionProps
 
 export const Section = React.forwardRef<HTMLElement, SectionProps>(
   ({ className, variant, spacing, as = "section", ...props }, ref) => {
-    const Tag = as as React.ElementType;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const Tag: any = as;
     return (
       <Tag
         ref={ref}

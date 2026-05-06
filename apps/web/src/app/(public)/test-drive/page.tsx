@@ -21,7 +21,71 @@ type SearchParams = Promise<{
   modelId?: string;
   stockUnitId?: string;
   slug?: string;
+  /** URL-encoded configurator querystring from /models/[slug]/build, e.g. "trim=...&exterior=...". */
+  config?: string;
 }>;
+
+/**
+ * Build a human-readable spec summary from the configurator querystring so it
+ * can be pre-filled into the test-drive notes field. Returns null if the
+ * config is missing/unreadable — the caller should fall back to the empty
+ * default. Lives on the page to keep the flow component pure.
+ */
+async function buildConfigNotes(
+  config: string | undefined,
+  modelSlug: string | undefined,
+  modelIdHint: string | undefined,
+): Promise<string | null> {
+  if (!config) return null;
+  let params: URLSearchParams;
+  try {
+    params = new URLSearchParams(config);
+  } catch {
+    return null;
+  }
+  const trimId = params.get("trim");
+  const exteriorId = params.get("exterior");
+  const interiorId = params.get("interior");
+  const optionIds = (params.get("options") ?? "")
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+
+  if (!trimId) return null;
+
+  const trim = await prisma.trim.findUnique({
+    where: { id: trimId },
+    include: { model: true },
+  });
+  if (!trim) return null;
+  // If a model hint is supplied, ensure the trim belongs to it — silently
+  // discard mismatches so a stale link can't pre-fill a different car's spec.
+  if (modelSlug && trim.model.slug !== modelSlug) return null;
+  if (modelIdHint && trim.model.id !== modelIdHint) return null;
+
+  const colorIds = [exteriorId, interiorId].filter(
+    (id): id is string => typeof id === "string" && id.length > 0,
+  );
+  const [colors, options] = await Promise.all([
+    colorIds.length > 0
+      ? prisma.color.findMany({ where: { id: { in: colorIds } } })
+      : Promise.resolve([]),
+    optionIds.length > 0
+      ? prisma.option.findMany({ where: { id: { in: optionIds } } })
+      : Promise.resolve([]),
+  ]);
+  const colorMap = new Map(colors.map((c) => [c.id, c]));
+  const exterior = exteriorId ? colorMap.get(exteriorId) : undefined;
+  const interior = interiorId ? colorMap.get(interiorId) : undefined;
+
+  const lines: string[] = [`Spec: ${trim.model.name} ${trim.name}`];
+  if (exterior) lines.push(`Exterior: ${exterior.name}`);
+  if (interior) lines.push(`Interior: ${interior.name}`);
+  if (options.length > 0) {
+    lines.push(`Options: ${options.map((o) => o.name).join(", ")}`);
+  }
+  return lines.join(" · ");
+}
 
 async function loadPrefill(sp: Awaited<SearchParams>): Promise<PrefilledVehicle | null> {
   if (sp.stockUnitId) {
@@ -111,6 +175,15 @@ export default async function TestDrivePage({
     loadModels(),
     loadStockUnits(),
   ]);
+  const configNotes = await buildConfigNotes(
+    sp.config,
+    sp.slug,
+    prefill?.kind === "model"
+      ? prefill.modelId
+      : prefill?.kind === "stockUnit"
+        ? prefill.modelId
+        : undefined,
+  );
 
   return (
     <>
@@ -134,7 +207,12 @@ export default async function TestDrivePage({
       </Section>
       <Section spacing="default">
         <Container>
-          <TestDriveFlow prefill={prefill} models={models} stockUnits={stock} />
+          <TestDriveFlow
+            prefill={prefill}
+            models={models}
+            stockUnits={stock}
+            configNotes={configNotes}
+          />
         </Container>
       </Section>
     </>

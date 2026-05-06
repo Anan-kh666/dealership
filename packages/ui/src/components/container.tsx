@@ -13,7 +13,8 @@ export function Container<T extends React.ElementType = "div">({
   children,
   ...rest
 }: ContainerProps<T>): React.ReactElement {
-  const Tag = (as ?? "div") as React.ElementType;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const Tag: any = as ?? "div";
   return (
     <Tag
       className={cn(
