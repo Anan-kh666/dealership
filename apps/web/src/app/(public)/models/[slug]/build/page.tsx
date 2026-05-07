@@ -10,6 +10,7 @@ import {
   type Trim,
   type TrimColor,
 } from "@dealership/db";
+import { auth } from "@/server/auth";
 import { ConfiguratorClient, type ConfiguratorModel } from "./configurator-client";
 
 export const dynamic = "force-dynamic";
@@ -62,7 +63,7 @@ export default async function BuildPage({
   params: Promise<{ slug: string }>;
 }): Promise<React.ReactElement> {
   const { slug } = await params;
-  const model = await getModel(slug);
+  const [model, session] = await Promise.all([getModel(slug), auth()]);
   if (!model || model.trims.length === 0) notFound();
 
   const serializable: ConfiguratorModel = {
@@ -121,5 +122,10 @@ export default async function BuildPage({
     })),
   };
 
-  return <ConfiguratorClient model={serializable} />;
+  return (
+    <ConfiguratorClient
+      model={serializable}
+      isSignedIn={Boolean(session?.user)}
+    />
+  );
 }

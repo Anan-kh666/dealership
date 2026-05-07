@@ -6,3 +6,5 @@ export * from "./finance.js";
 export * from "./trade-in.js";
 export * from "./financing.js";
 export * from "./configurator.js";
+export * from "./auth.js";
+export * from "./account.js";

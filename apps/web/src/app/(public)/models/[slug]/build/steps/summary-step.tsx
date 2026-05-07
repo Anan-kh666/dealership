@@ -5,6 +5,7 @@ import Link from "next/link";
 import { BrandButton } from "@dealership/ui/components/brand-button";
 import { SpecList } from "../components/spec-list";
 import { NearMatches } from "../components/near-matches";
+import { SaveBuildModal } from "../components/save-build-modal";
 import { buildQueryString } from "../lib/url-sync";
 import { findStockAction } from "../actions";
 import type { MatchResult } from "../lib/stock-match";
@@ -22,6 +23,7 @@ interface SummaryStepProps {
   totalLabel: string;
   total: number;
   onBack: () => void;
+  isSignedIn: boolean;
 }
 
 export function SummaryStep({
@@ -33,6 +35,7 @@ export function SummaryStep({
   totalLabel,
   total,
   onBack,
+  isSignedIn,
 }: SummaryStepProps): React.ReactElement {
   const exterior = trim.exteriorColors.find((c) => c.id === exteriorColorId);
   const interior = trim.interiorColors.find((c) => c.id === interiorColorId);
@@ -208,6 +211,27 @@ export function SummaryStep({
         >
           Share build
         </BrandButton>
+        {isSignedIn ? (
+          <SaveBuildModal
+            modelSlug={model.slug}
+            trim={trim.id}
+            exterior={exteriorColorId}
+            interior={interiorColorId}
+            options={optionIds}
+            totalAtSave={total}
+            defaultName={`${model.name} ${trim.name}`}
+          />
+        ) : (
+          <BrandButton asChild variant="ghost-dark" size="md">
+            <Link
+              href={`/sign-in?callbackUrl=${encodeURIComponent(
+                typeof window !== "undefined" ? window.location.pathname + window.location.search : `/models/${model.slug}/build`,
+              )}`}
+            >
+              Sign in to save
+            </Link>
+          </BrandButton>
+        )}
       </div>
 
       {matchState.kind === "error" ? (

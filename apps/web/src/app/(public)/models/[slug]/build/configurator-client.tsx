@@ -83,8 +83,10 @@ interface StepDef {
 
 export function ConfiguratorClient({
   model,
+  isSignedIn,
 }: {
   model: ConfiguratorModel;
+  isSignedIn: boolean;
 }): React.ReactElement {
   const router = useRouter();
   const pathname = usePathname();
@@ -335,6 +337,7 @@ export function ConfiguratorClient({
                   totalLabel={totalLabel}
                   total={total}
                   onBack={goBack}
+                  isSignedIn={isSignedIn}
                 />
               ) : null}
             </div>

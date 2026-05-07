@@ -176,14 +176,94 @@ model User {
   id             String               @id @default(cuid())
   email          String               @unique
   phone          String?
-  name           String
+  name           String?
+  image          String?
+  icNumber       String?
   passwordHash   String?
+  emailVerified  DateTime?
+  failedAttempts Int                  @default(0)
+  lockedUntil    DateTime?
+  claimedAt      DateTime?
   role           Role                 @default(CUSTOMER)
+  accounts       Account[]
+  sessions       Session[]
   configurations Configuration[]
   testDrives     TestDrive[]
   applications   FinanceApplication[]
   tradeIns       TradeIn[]
+  builds         Build[]
   createdAt      DateTime             @default(now())
+  updatedAt      DateTime             @updatedAt
+}
+
+// Auth.js v5 Prisma adapter — OAuth account linkage. One row per
+// (provider, providerAccountId). Cascade-delete with the user.
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+}
+
+// Auth.js v5 Prisma adapter — DB-backed sessions. Session strategy is
+// "database" so we can revoke a session by deleting its row. Extended
+// with deviceLabel/lastIp/lastSeenAt for the /account/sessions UI.
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expires      DateTime
+  deviceLabel  String?
+  lastIp       String?
+  lastSeenAt   DateTime?
+  createdAt    DateTime @default(now())
+
+  @@index([userId])
+}
+
+// Auth.js v5 Prisma adapter — used for email-verification AND
+// password-reset, distinguished by `type`.
+model VerificationToken {
+  identifier String
+  token      String                @unique
+  expires    DateTime
+  type       VerificationTokenType @default(EMAIL_VERIFICATION)
+  createdAt  DateTime              @default(now())
+
+  @@unique([identifier, token])
+  @@index([identifier])
+}
+
+// Saved configurator builds (separate from `Configuration` which is the
+// shareable share-code artefact created on submit). A Build is a
+// user-named snapshot a customer can return to from /account/builds.
+model Build {
+  id           String   @id @default(cuid())
+  userId       String?
+  user         User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  modelSlug    String
+  name         String
+  trim         String
+  exterior     String?
+  interior     String?
+  options      Json
+  totalAtSave  Decimal  @db.Decimal(12, 2)
+  createdAt    DateTime @default(now())
+
+  @@index([userId])
 }
 
 model TestDrive {
@@ -419,4 +499,9 @@ enum InquiryStatus {
   CONTACTED
   IN_PROGRESS
   CLOSED
+}
+
+enum VerificationTokenType {
+  EMAIL_VERIFICATION
+  PASSWORD_RESET
 }
