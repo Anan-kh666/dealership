@@ -1,0 +1,51 @@
+{
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "options": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "description": {
+            "type": "string",
+            "default": ""
+          },
+          "category": {
+            "type": "string",
+            "enum": [
+              "SAFETY",
+              "COMFORT",
+              "TECH",
+              "PERFORMANCE",
+              "EXTERIOR",
+              "INTERIOR"
+            ]
+          },
+          "price": {
+            "type": "number",
+            "minimum": 0,
+            "description": "Ringgit, e.g. 96800"
+          }
+        },
+        "required": [
+          "name",
+          "category",
+          "price"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "options"
+  ],
+  "additionalProperties": false,
+  "$schema": "http://json-schema.org/draft-07/schema#"
+}

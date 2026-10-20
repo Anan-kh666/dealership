@@ -1,0 +1,693 @@
+{
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "published": {
+      "type": "boolean",
+      "default": true,
+      "description": "false keeps it off the public site (it can still be previewed at /models/<slug>/build)"
+    },
+    "make": {
+      "type": "string",
+      "minLength": 1
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "year": {
+      "type": "integer",
+      "minimum": 1990,
+      "maximum": 2100
+    },
+    "bodyType": {
+      "type": "string",
+      "enum": [
+        "SEDAN",
+        "SUV",
+        "HATCHBACK",
+        "COUPE",
+        "CONVERTIBLE",
+        "TRUCK",
+        "VAN",
+        "WAGON"
+      ]
+    },
+    "description": {
+      "type": "string",
+      "minLength": 1
+    },
+    "featured": {
+      "type": "boolean",
+      "default": false
+    },
+    "displayOrder": {
+      "type": "integer",
+      "default": 100
+    },
+    "highlights": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "default": []
+    },
+    "seo": {
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string",
+          "minLength": 1
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false,
+      "default": {}
+    },
+    "heroImage": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Default: the first image"
+    },
+    "images": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "src": {
+            "type": "string",
+            "minLength": 1,
+            "description": "A https:// URL, or a file path inside this vehicle's folder (e.g. images/front.jpg)"
+          },
+          "alt": {
+            "type": "string",
+            "minLength": 1
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "EXTERIOR",
+              "INTERIOR",
+              "DETAIL",
+              "LIFESTYLE"
+            ],
+            "default": "EXTERIOR"
+          }
+        },
+        "required": [
+          "src",
+          "alt"
+        ],
+        "additionalProperties": false
+      },
+      "default": []
+    },
+    "colors": {
+      "type": "object",
+      "properties": {
+        "exterior": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "minLength": 1
+              },
+              "hex": {
+                "type": "string",
+                "pattern": "^#[0-9a-fA-F]{6}$"
+              },
+              "metallic": {
+                "type": "boolean",
+                "default": false
+              },
+              "upcharge": {
+                "type": "number",
+                "minimum": 0,
+                "description": "Ringgit, e.g. 96800",
+                "default": 0
+              }
+            },
+            "required": [
+              "name",
+              "hex"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 1
+        },
+        "interior": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "minLength": 1
+              },
+              "hex": {
+                "type": "string",
+                "pattern": "^#[0-9a-fA-F]{6}$"
+              },
+              "upcharge": {
+                "type": "number",
+                "minimum": 0,
+                "description": "Ringgit, e.g. 96800",
+                "default": 0
+              }
+            },
+            "required": [
+              "name",
+              "hex"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 1
+        }
+      },
+      "required": [
+        "exterior",
+        "interior"
+      ],
+      "additionalProperties": false
+    },
+    "options": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "description": {
+            "type": "string",
+            "default": ""
+          },
+          "category": {
+            "type": "string",
+            "enum": [
+              "SAFETY",
+              "COMFORT",
+              "TECH",
+              "PERFORMANCE",
+              "EXTERIOR",
+              "INTERIOR"
+            ]
+          },
+          "price": {
+            "type": "number",
+            "minimum": 0,
+            "description": "Ringgit, e.g. 96800"
+          }
+        },
+        "required": [
+          "name",
+          "category",
+          "price"
+        ],
+        "additionalProperties": false
+      },
+      "default": [],
+      "description": "Options only this vehicle offers (shared ones live in _shared/options.json)"
+    },
+    "trims": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "price": {
+            "type": "number",
+            "minimum": 0,
+            "description": "Ringgit, e.g. 96800"
+          },
+          "engineSize": {
+            "anyOf": [
+              {
+                "type": "number",
+                "exclusiveMinimum": 0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Litres; null for EVs"
+          },
+          "horsepower": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "exclusiveMinimum": 0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "torque": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "exclusiveMinimum": 0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Nm"
+          },
+          "transmission": {
+            "type": "string",
+            "enum": [
+              "AUTOMATIC",
+              "MANUAL",
+              "CVT",
+              "DCT"
+            ]
+          },
+          "fuelType": {
+            "type": "string",
+            "enum": [
+              "PETROL",
+              "DIESEL",
+              "HYBRID",
+              "PLUGIN_HYBRID",
+              "ELECTRIC"
+            ]
+          },
+          "drivetrain": {
+            "type": "string",
+            "enum": [
+              "FWD",
+              "RWD",
+              "AWD",
+              "FOUR_WD"
+            ]
+          },
+          "fuelEconomy": {
+            "anyOf": [
+              {
+                "type": "number",
+                "exclusiveMinimum": 0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "km/L, or kWh/100km for EVs"
+          },
+          "zeroToHundred": {
+            "anyOf": [
+              {
+                "type": "number",
+                "exclusiveMinimum": 0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Seconds"
+          },
+          "topSpeed": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "exclusiveMinimum": 0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "km/h"
+          },
+          "seats": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 15
+          },
+          "doors": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 6
+          },
+          "cargoCapacity": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "exclusiveMinimum": 0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Litres"
+          },
+          "features": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "default": []
+          },
+          "options": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "minLength": 1,
+                  "description": "An option from _shared/options.json or this file's `options`"
+                },
+                "standard": {
+                  "type": "boolean",
+                  "default": false
+                }
+              },
+              "required": [
+                "name"
+              ],
+              "additionalProperties": false
+            },
+            "default": []
+          }
+        },
+        "required": [
+          "name",
+          "price",
+          "transmission",
+          "fuelType",
+          "drivetrain",
+          "seats",
+          "doors"
+        ],
+        "additionalProperties": false
+      },
+      "minItems": 1
+    },
+    "stock": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "vin": {
+            "type": "string",
+            "minLength": 17,
+            "maxLength": 17
+          },
+          "trim": {
+            "type": "string",
+            "minLength": 1
+          },
+          "exteriorColor": {
+            "type": "string",
+            "minLength": 1
+          },
+          "interiorColor": {
+            "type": "string",
+            "minLength": 1
+          },
+          "options": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "default": []
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "AVAILABLE",
+              "RESERVED",
+              "SOLD",
+              "IN_TRANSIT"
+            ],
+            "default": "AVAILABLE"
+          },
+          "arrivedDaysAgo": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "expectedInDays": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "required": [
+          "vin",
+          "trim",
+          "exteriorColor",
+          "interiorColor"
+        ],
+        "additionalProperties": false
+      },
+      "default": [],
+      "description": "Demo inventory. Created once; later changes are made in the admin"
+    },
+    "model3d": {
+      "type": "object",
+      "properties": {
+        "file": {
+          "type": "string",
+          "description": "3D file in this folder (.glb or .gltf). Default: the only .glb/.gltf here"
+        },
+        "forward": {
+          "type": "string",
+          "enum": [
+            "-Y",
+            "+Y",
+            "-X",
+            "+X"
+          ],
+          "description": "Blender axis the nose points along. Default: detected from headlight/taillight materials, else -Y"
+        },
+        "rotationY": {
+          "type": "number",
+          "description": "Advanced: exact rotation (radians) instead of `forward`"
+        },
+        "length": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Display length in scene units (~0.85 × metres)"
+        },
+        "optimize": {
+          "type": "boolean",
+          "default": true,
+          "description": "Compress geometry and textures. Turn off for files that are already optimised"
+        },
+        "textureSize": {
+          "type": "integer",
+          "minimum": 256,
+          "maximum": 4096,
+          "default": 1024
+        },
+        "materials": {
+          "type": "object",
+          "properties": {
+            "paint": {
+              "type": "string"
+            },
+            "interior": {
+              "type": "string"
+            },
+            "rim": {
+              "type": "string"
+            },
+            "glass": {
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        },
+        "rig": {
+          "type": "object",
+          "properties": {
+            "wheels": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "wheelAxis": {
+              "type": "array",
+              "minItems": 3,
+              "maxItems": 3,
+              "items": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                }
+              ]
+            },
+            "calipers": {
+              "type": "string"
+            },
+            "doors": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "node": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "axis": {
+                    "type": "array",
+                    "minItems": 3,
+                    "maxItems": 3,
+                    "items": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "number"
+                      }
+                    ]
+                  },
+                  "angle": {
+                    "type": "number"
+                  }
+                },
+                "required": [
+                  "node",
+                  "axis",
+                  "angle"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "headlights": {
+              "type": "string"
+            },
+            "taillights": {
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        },
+        "interior": {
+          "type": "object",
+          "properties": {
+            "rows": {
+              "type": "number",
+              "enum": [
+                1,
+                2
+              ]
+            },
+            "cabin": {
+              "type": "object",
+              "properties": {
+                "x0": {
+                  "type": "number"
+                },
+                "x1": {
+                  "type": "number"
+                },
+                "width": {
+                  "type": "number"
+                },
+                "belt": {
+                  "type": "number"
+                },
+                "roof": {
+                  "type": "number"
+                }
+              },
+              "additionalProperties": false
+            },
+            "hide": {
+              "type": "string"
+            },
+            "replace": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "rows"
+          ],
+          "additionalProperties": false
+        },
+        "credit": {
+          "type": "object",
+          "properties": {
+            "title": {
+              "type": "string",
+              "minLength": 1
+            },
+            "author": {
+              "type": "string",
+              "minLength": 1
+            },
+            "license": {
+              "type": "string",
+              "minLength": 1
+            },
+            "licenseUrl": {
+              "type": "string",
+              "format": "uri"
+            },
+            "sourceUrl": {
+              "type": "string",
+              "format": "uri"
+            },
+            "modified": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "title",
+            "author",
+            "license",
+            "licenseUrl",
+            "sourceUrl",
+            "modified"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false,
+      "default": {}
+    }
+  },
+  "required": [
+    "make",
+    "name",
+    "year",
+    "bodyType",
+    "description",
+    "colors",
+    "trims"
+  ],
+  "additionalProperties": false,
+  "$schema": "http://json-schema.org/draft-07/schema#"
+}

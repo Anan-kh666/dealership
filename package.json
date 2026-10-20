@@ -16,9 +16,14 @@
     "clean": "turbo run clean && rm -rf node_modules",
     "db:generate": "pnpm --filter @dealership/db db:generate",
     "db:migrate:dev": "pnpm --filter @dealership/db db:migrate:dev",
+    "db:migrate:deploy": "pnpm --filter @dealership/db db:migrate:deploy",
     "db:studio": "pnpm --filter @dealership/db db:studio",
-    "db:seed": "pnpm --filter @dealership/db db:seed",
-    "format": "prettier --write \"**/*.{ts,tsx,md,json}\""
+    "db:seed": "pnpm --filter @dealership/db db:seed && pnpm --filter @dealership/vehicles sync:seed",
+    "format": "prettier --write \"**/*.{ts,tsx,md,json}\"",
+    "db:up": "docker compose up -d --wait",
+    "db:setup": "pnpm db:up && pnpm db:generate && pnpm db:migrate:deploy && pnpm db:seed",
+    "vehicles:sync": "pnpm --filter @dealership/vehicles sync",
+    "vehicles:check": "pnpm --filter @dealership/vehicles check"
   },
   "devDependencies": {
     "prettier": "^3.3.3",

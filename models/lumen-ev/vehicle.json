@@ -1,0 +1,328 @@
+{
+  "$schema": "../_schema/vehicle.schema.json",
+  "published": true,
+  "make": "Lumen",
+  "name": "Lumen EV",
+  "year": 2026,
+  "bodyType": "SEDAN",
+  "description": "A long-range electric sedan engineered for Malaysian conditions. Heat-tolerant battery thermal management, 11kW AC home charging, and 180kW DC fast-charge on the road.",
+  "featured": true,
+  "displayOrder": 4,
+  "highlights": [
+    "WLTP range: 520 km on Long Range",
+    "180kW DC charging — 10–80% in 27 minutes",
+    "Heat-pump cabin climate",
+    "Frunk + boot total 511L"
+  ],
+  "seo": {
+    "title": "Lumen EV — Long-range electric sedan",
+    "description": "The Lumen EV is a long-range electric sedan with 520km WLTP range, 180kW DC fast charging, and battery thermal management built for Malaysian conditions."
+  },
+  "heroImage": "https://images.unsplash.com/photo-1617788138017-80ad40651399?w=1600&q=85&auto=format&fit=crop",
+  "images": [
+    {
+      "src": "https://images.unsplash.com/photo-1617788138017-80ad40651399?w=1600&q=85&auto=format&fit=crop",
+      "alt": "Lumen EV charging at a roadside station",
+      "type": "EXTERIOR"
+    },
+    {
+      "src": "https://images.unsplash.com/photo-1536700503339-1e4b06520771?w=1600&q=85&auto=format&fit=crop",
+      "alt": "Lumen EV in black on an open road",
+      "type": "EXTERIOR"
+    },
+    {
+      "src": "https://images.unsplash.com/photo-1560958089-b8a1929cea89?w=1600&q=85&auto=format&fit=crop",
+      "alt": "Lumen EV in pearl white on the coast",
+      "type": "EXTERIOR"
+    },
+    {
+      "src": "https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?w=1600&q=85&auto=format&fit=crop",
+      "alt": "Lumen EV minimalist cabin",
+      "type": "INTERIOR"
+    },
+    {
+      "src": "https://images.unsplash.com/photo-1593941707882-a5bba14938c7?w=1600&q=85&auto=format&fit=crop",
+      "alt": "Lumen EV charging port detail",
+      "type": "DETAIL"
+    },
+    {
+      "src": "https://images.unsplash.com/photo-1671785253964-bdb43087ed99?w=1600&q=85&auto=format&fit=crop",
+      "alt": "Lumen EV plugged in at a public fast charger",
+      "type": "LIFESTYLE"
+    }
+  ],
+  "colors": {
+    "exterior": [
+      {
+        "name": "Pearl White",
+        "hex": "#EEEAE1",
+        "metallic": false,
+        "upcharge": 0
+      },
+      {
+        "name": "Graphite Metallic",
+        "hex": "#2A2A2A",
+        "metallic": true,
+        "upcharge": 1500
+      },
+      {
+        "name": "Deep Marine",
+        "hex": "#1F2C3A",
+        "metallic": true,
+        "upcharge": 1500
+      },
+      {
+        "name": "Sienna Bronze",
+        "hex": "#B08D57",
+        "metallic": true,
+        "upcharge": 3500
+      }
+    ],
+    "interior": [
+      {
+        "name": "Charcoal",
+        "hex": "#262626",
+        "upcharge": 3500
+      },
+      {
+        "name": "Caramel",
+        "hex": "#7B5430",
+        "upcharge": 3500
+      }
+    ]
+  },
+  "trims": [
+    {
+      "name": "Standard Range",
+      "price": 218000,
+      "engineSize": null,
+      "horsepower": 220,
+      "torque": 340,
+      "transmission": "AUTOMATIC",
+      "fuelType": "ELECTRIC",
+      "drivetrain": "RWD",
+      "fuelEconomy": 6.4,
+      "zeroToHundred": 7.1,
+      "topSpeed": 200,
+      "seats": 5,
+      "doors": 4,
+      "cargoCapacity": 511,
+      "features": [
+        "440 km WLTP range",
+        "150kW DC fast charging",
+        "Heat-pump climate system",
+        "12.3\" centre display",
+        "Over-the-air updates"
+      ],
+      "options": [
+        {
+          "name": "Adaptive Cruise Control",
+          "standard": true
+        },
+        {
+          "name": "Blind-Spot Monitoring",
+          "standard": true
+        },
+        {
+          "name": "Wireless Charging Pad",
+          "standard": true
+        },
+        {
+          "name": "Heated & Ventilated Seats",
+          "standard": false
+        },
+        {
+          "name": "Panoramic Sunroof",
+          "standard": false
+        }
+      ]
+    },
+    {
+      "name": "Long Range",
+      "price": 238000,
+      "engineSize": null,
+      "horsepower": 260,
+      "torque": 380,
+      "transmission": "AUTOMATIC",
+      "fuelType": "ELECTRIC",
+      "drivetrain": "RWD",
+      "fuelEconomy": 6.1,
+      "zeroToHundred": 6.4,
+      "topSpeed": 210,
+      "seats": 5,
+      "doors": 4,
+      "cargoCapacity": 511,
+      "features": [
+        "520 km WLTP range",
+        "180kW DC fast charging",
+        "Heat-pump climate with cabin pre-conditioning",
+        "Heated and ventilated front seats",
+        "Panoramic glass roof",
+        "11-speaker premium audio"
+      ],
+      "options": [
+        {
+          "name": "Adaptive Cruise Control",
+          "standard": true
+        },
+        {
+          "name": "Blind-Spot Monitoring",
+          "standard": true
+        },
+        {
+          "name": "Wireless Charging Pad",
+          "standard": true
+        },
+        {
+          "name": "Heated & Ventilated Seats",
+          "standard": true
+        },
+        {
+          "name": "Panoramic Sunroof",
+          "standard": true
+        },
+        {
+          "name": "Premium Audio (12 Speakers)",
+          "standard": true
+        },
+        {
+          "name": "Head-Up Display",
+          "standard": false
+        }
+      ]
+    },
+    {
+      "name": "Performance",
+      "price": 278000,
+      "engineSize": null,
+      "horsepower": 410,
+      "torque": 660,
+      "transmission": "AUTOMATIC",
+      "fuelType": "ELECTRIC",
+      "drivetrain": "AWD",
+      "fuelEconomy": 6.8,
+      "zeroToHundred": 3.9,
+      "topSpeed": 240,
+      "seats": 5,
+      "doors": 4,
+      "cargoCapacity": 511,
+      "features": [
+        "Dual-motor all-wheel drive",
+        "0–100 in 3.9 seconds",
+        "Adaptive air suspension",
+        "Track Mode with telemetry",
+        "20\" performance alloys",
+        "Carbon-fibre interior accents"
+      ],
+      "options": [
+        {
+          "name": "Adaptive Cruise Control",
+          "standard": true
+        },
+        {
+          "name": "Blind-Spot Monitoring",
+          "standard": true
+        },
+        {
+          "name": "Wireless Charging Pad",
+          "standard": true
+        },
+        {
+          "name": "Heated & Ventilated Seats",
+          "standard": true
+        },
+        {
+          "name": "Panoramic Sunroof",
+          "standard": true
+        },
+        {
+          "name": "Premium Audio (12 Speakers)",
+          "standard": true
+        },
+        {
+          "name": "Head-Up Display",
+          "standard": true
+        },
+        {
+          "name": "Sport Suspension",
+          "standard": true
+        },
+        {
+          "name": "20\" Alloy Wheels",
+          "standard": true
+        },
+        {
+          "name": "Nappa Leather Upholstery",
+          "standard": true
+        }
+      ]
+    }
+  ],
+  "stock": [
+    {
+      "vin": "WBALUM20260000001",
+      "trim": "Long Range",
+      "exteriorColor": "Pearl White",
+      "interiorColor": "Charcoal",
+      "options": [
+        "Head-Up Display"
+      ],
+      "status": "AVAILABLE",
+      "arrivedDaysAgo": 10
+    },
+    {
+      "vin": "WBALUM20260000002",
+      "trim": "Performance",
+      "exteriorColor": "Graphite Metallic",
+      "interiorColor": "Charcoal",
+      "options": [],
+      "status": "RESERVED",
+      "arrivedDaysAgo": 7
+    }
+  ],
+  "model3d": {
+    "file": "model.glb",
+    "rotationY": 1.5707963267948966,
+    "length": 3.7,
+    "optimize": false,
+    "rig": {
+      "wheels": [
+        "WheelFrontL",
+        "WheelFrontR",
+        "WheelRearL",
+        "WheelRearR"
+      ],
+      "calipers": "BrakePad",
+      "doors": [
+        {
+          "node": "BodyDoorLColor1",
+          "axis": [
+            0,
+            0,
+            1
+          ],
+          "angle": -1.05
+        },
+        {
+          "node": "BodyDoorRColor1",
+          "axis": [
+            0,
+            0,
+            1
+          ],
+          "angle": 1.05
+        }
+      ],
+      "headlights": "^headlight$",
+      "taillights": "^brakelight$"
+    },
+    "credit": {
+      "title": "Car Concept",
+      "author": "Eric Chadwick, Darmstadt Graphics Group",
+      "license": "CC BY 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/4.0/",
+      "sourceUrl": "https://github.com/KhronosGroup/glTF-Sample-Assets/tree/main/Models/CarConcept",
+      "modified": true
+    }
+  }
+}

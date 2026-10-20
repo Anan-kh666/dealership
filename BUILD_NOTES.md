@@ -773,3 +773,206 @@ open http://localhost:3000
 ```
 
 `pnpm db:migrate:dev` only runs once you have a real `DATABASE_URL`.
+
+## Completion pass — accounts, admin, content, polish
+
+This pass finished the scaffolded areas and fixed what was broken. Every
+page linked from the header and footer now exists.
+
+### Fixed
+
+- **Configurator restored.** `/models/[slug]/build` had been deleted from the
+  working tree while seven links (header "Build", every "Build Yours") still
+  pointed at it. Restored from git. Its 3D preview no longer downloads an HDR
+  environment from a third-party CDN at runtime (built from in-scene
+  `Lightformer`s instead), has a WebGL error boundary, frames the car on
+  narrow screens, and the wizard resets to step 1 when switching models
+  (`hydrate()`), skipping straight past the trim step when deep-linked with
+  `?trim=`.
+- **Header** was white-on-white on every page without the dark homepage hero.
+  It's now solid everywhere except `OVERLAY_ROUTES` (`/`), with active-link
+  state, a skip link, and a mobile drawer that closes on navigation/Escape.
+- **Homepage** is fully data-driven: "Available now" reads real stock (the
+  placeholder cards linked to non-existent slugs), "Find your match" uses
+  enum values `/models` actually filters on, the financing headline is
+  computed with the same flat-rate maths as the calculator, and the journal
+  teaser reads `BlogPost`. `data/placeholders.ts` is gone (images moved to
+  `data/media.ts`).
+- **"Get financing" links** pass `?stockUnitId=` to `/financing`, which now
+  pre-loads that car's price and carries it through to the application.
+- **`.env` loading.** Next.js reads `.env` from `apps/web` and the API read
+  none, so `pnpm dev` from the root ran without `DATABASE_URL`. All app and db
+  scripts now load the root `.env` through `dotenv-cli`.
+- **Seed** no longer crashes when leads reference models/stock (it detaches
+  them first), gives each model distinct verified gallery photos instead of
+  one image repeated, rotates stock cover photos, and seeds journal posts and
+  demo accounts. "Continental GT 2026" → "Continental GT" (the year was being
+  printed twice everywhere).
+- JSON-LD on model/stock pages escapes `<`.
+- The test-drive store no longer writes the optional account password to
+  `sessionStorage`.
+
+### Accounts
+
+Auth.js v5 Credentials (bcrypt, JWT sessions with `role`). Edge-safe config
+in `server/auth.config.ts` for middleware; full config in `server/auth.ts`.
+`/register`, `/sign-in`, `/account` (overview, test drives with cancel,
+financing, trade-ins, settings with profile + password change). The
+test-drive "Create an account?" option now really creates the account and
+signs the customer in after a successful booking.
+
+**Known limitation:** leads created by guests are matched to an account by
+email. Without email verification, someone could register another person's
+address and see that address's booking summaries (no IC numbers, income or
+documents are shown). Add verification before launch.
+
+### Admin
+
+`/admin` for `STAFF` / `MANAGER` / `ADMIN`: dashboard (7-day lead counts,
+upcoming drives, inventory by status, activity feed), test drives
+(upcoming/past, status), financing (DSR indicator, full detail page, internal
+notes), trade-ins (detail incl. the JSON extras stored in `notes`, photo
+grid, quote + status — quotes become visible to the customer on
+`/trade-in/status` and `/account/trade-ins`), enquiries, inventory status
+(reserving a car removes it from `/stock` immediately). Implemented as Server
+Actions with `requireStaff()` in every action; the Fastify `/admin` scope
+stays reserved for a future token-authenticated client.
+
+### Content & SEO
+
+`/blog`, `/blog/[slug]`, `/about`, `/about/team`, `/careers`, `/press`,
+`/after-sales`, `/contact` (working enquiry form → `Inquiry`), `/privacy`
+(PDPA 2010), `/terms`, `/trade-in/status`. `sitemap.xml`, `robots.txt`,
+`metadataBase`, app icon. Business details are centralised in
+`packages/types/src/site.ts`. **Legal pages need review by counsel.**
+
+### Email
+
+Test-drive confirmations and trade-in confirmations now go through
+`sendMail()` (they were log-only even with SMTP configured), plus staff
+notifications to `ADMIN_NOTIFY_EMAIL`.
+
+### Verification
+
+`pnpm typecheck`, `pnpm lint`, `pnpm test` (31 tests) and `pnpm build` pass.
+An end-to-end browser run covered registration, validation, profile and
+password changes, sign-out, role gating (customers bounced from `/admin`),
+email-matched bookings and cancellation, every admin page, and reserving /
+restoring a stock unit. Pages were checked at 1440px and 390px.
+
+## Configurator: real 3D models
+
+The configurator now loads a real glTF model per vehicle when one is
+available (`apps/web/src/lib/car-assets.ts`), with live paint (metallic vs
+solid finish), interior colour and sport-trim wheel tint, a download
+progress indicator, and automatic fallback to the stylised placeholder if a
+file is missing or fails.
+
+**Continental GT** uses the Khronos "Car Concept" sample (Eric Chadwick /
+Darmstadt Graphics Group, CC BY 4.0) — a realistic, unbranded sports coupe
+with clear-coat paint. Its Khronos logos were removed (the licence excludes
+them), the plate retextured, variants dropped and geometry Meshopt-compressed
+(10.3 MB → 3.8 MB); attribution is shown under the canvas as CC BY requires.
+
+**The other four models still use the placeholder.** No realistic, freely
+licensed, brand-neutral sedan / SUV / crossover / EV models were available.
+Buy or commission brand-neutral models (CGTrader, TurboSquid, Sketchfab
+"Standard" licence), export per `apps/web/public/models/README.md`, register
+them in `car-assets.ts`, and they appear with no other code changes.
+
+### Realistic rendering + animation
+
+- **Lighting:** "Studio Small 09" HDRI (Poly Haven, CC0) for image-based
+  lighting, plus in-scene strip lights for long, crisp paint highlights.
+- **Stage:** blurred reflective showroom floor fading into fog, contact
+  shadows, ambient occlusion (N8AO), bloom on the lamps, ACES filmic tone
+  mapping, SMAA and a soft vignette. Phones / low-core devices get a lighter
+  tier; struggling devices drop resolution at runtime.
+- **Motion:** the car drives in from stage left with wheels rolling
+  (calipers stay static), brake lights flare as it stops, then the LED
+  headlights switch on. The camera glides to a framing for each configurator
+  step; on the interior step both doors swing open on their real hinges
+  (Continental GT). Paint, interior and wheel changes cross-fade. After six
+  idle seconds the view turns slowly like a showroom turntable. Everything
+  respects `prefers-reduced-motion`.
+- **Load experience:** the canvas stays hidden behind "Preparing your car"
+  until shaders are compiled and the car has rendered, then fades in — no
+  black flash.
+- `@react-three/fiber` bumped 9.6 → 9.8 (required by `@react-three/postprocessing` 3.2).
+
+Bugs found while testing in Chrome: a 1024px reflection buffer rendered
+solid black on software GPUs (now 512px, visually identical under the blur),
+and swapping effect tiers mid-session caused black frames (tier is now fixed
+at mount).
+
+### Realistic models for the whole line-up
+
+All five cars now use real 3D models (sources and licences in
+`apps/web/public/models/README.md`): brand-neutral sedan (Meridian), concept
+crossover-SUV (Aurora), brandless estate (Halcyon CX), generic GT coupé
+(Continental GT), and the Khronos concept moved to the Lumen EV. Downloaded
+from Sketchfab through the browser after the account owner signed in;
+processed to 0.4–3.8 MB each.
+
+- Wheel spin no longer needs a per-model axle: the axle is the car's lateral
+  axis expressed in each wheel's parent space, and the rolling radius is the
+  axle height. Works for meshes and rig bones alike.
+- Doors only exist on the Lumen EV rig; other cars keep closed doors on the
+  interior step.
+
+### Interiors + clear glass
+
+- Tinted / opaque window materials are replaced with clear automotive glass
+  (physical transmission, IOR 1.52): see-through head-on, strong
+  reflections at glancing angles, no grey veil.
+- Meridian, Aurora and Halcyon shipped with placeholder cabins (grey
+  blocks / empty floors). They now get a generated interior fitted to each
+  car's glass: quilted, grained leather bucket seats with bolsters and
+  headrests, a rear bench, soft-touch dashboard with brushed trim and an
+  amber ambient line, a floating infotainment screen and digital cluster
+  (generic, generated artwork — nothing trademarked), right-hand-drive
+  steering wheel, centre console with gear selector, door cards and carpet.
+  The crude original meshes are hidden.
+- Continental GT and Lumen EV keep their real modelled interiors; all five
+  respond to the interior colour picker.
+- The Aurora's glazing material also covers its roof, which reads as a
+  panoramic glass roof.
+- The interior step's camera now looks down through the driver's side glass.
+
+## Vehicles as folders (`models/`)
+
+The catalogue moved out of `packages/db/prisma/seed.ts` and the 3D registry
+out of `apps/web/src/lib/car-assets.ts`. Every vehicle is now a folder,
+`models/<slug>/`, holding a `vehicle.json` (details, trims, colours, gallery,
+demo stock, 3D settings) and its 3D file. `packages/vehicles` turns the
+folders into catalogue rows and configurator assets. Full guide:
+`models/README.md`.
+
+- **Adding a car:** drop a folder in. With `pnpm dev` running, a watcher
+  syncs within about a second. A folder holding only a `.glb` gets a draft
+  `vehicle.json` and is added unpublished, so it can be previewed at
+  `/models/<slug>/build` before going live.
+- **Blender:** `.glb`, `.gltf` + `.bin` + textures, and Draco-compressed
+  exports are all accepted. The sync re-encodes textures as WebP (≤1024 px),
+  Meshopt-compresses geometry, and moves wheel pivots to the hub (Blender
+  object origins are rarely there, and linked duplicates share one mesh).
+  It detects the four wheels by name (skipping steering and spare wheels),
+  the head/tail-lamp materials, and the front: from the lamps, otherwise
+  Blender's −Y convention. It warns when the paint or glass materials or
+  the wheels can't be found. `models/_blender/export_to_site.py` exports
+  from inside Blender with the right settings. This script hasn't been run
+  in Blender here (it isn't installed), but the pipeline was tested with
+  Blender-shaped files in all three export formats.
+- **Database:** upserts by natural keys (slug, trim name, option name,
+  colour name + type, VIN), so row IDs stay stable. The migrated catalogue
+  matched the old seed row for row, IDs included. Removed trims are deleted
+  only when no stock or saved build uses them. A deleted folder sets
+  `isActive = false`. Stock is create-only except under `pnpm db:seed`.
+- **Build / deploy:** `@dealership/vehicles build` publishes 3D files and
+  images to `apps/web/public/vehicles/` (git-ignored) with no database. It
+  runs before the web build through turbo's `^build`. Run
+  `pnpm vehicles:sync` as a release step to update the catalogue.
+  `pnpm vehicles:check` runs in CI.
+- **Kept as-is:** interior colours carry a RM 3,500 upcharge, as the old
+  seed's `upchargeFor()` produced, so customers can't pick a free interior.
+  This looks unintended. It's now a one-line change per vehicle.json.

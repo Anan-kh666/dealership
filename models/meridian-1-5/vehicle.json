@@ -1,0 +1,257 @@
+{
+  "$schema": "../_schema/vehicle.schema.json",
+  "published": true,
+  "make": "Meridian",
+  "name": "Meridian 1.5",
+  "year": 2026,
+  "bodyType": "SEDAN",
+  "description": "An everyday sedan with composed manners and a cabin that wears well. Built for daily Klang Valley traffic and the long quiet stretches between cities.",
+  "featured": true,
+  "displayOrder": 1,
+  "highlights": [
+    "Driver assist suite as standard",
+    "18.2 km/L combined economy",
+    "Five-year warranty, no asterisks",
+    "Cabin tuned for highway quiet"
+  ],
+  "seo": {
+    "title": "Meridian 1.5 — Composed daily sedan",
+    "description": "The Meridian 1.5 is a composed daily sedan with driver assist as standard, an honest five-year warranty, and a cabin tuned for the long road."
+  },
+  "heroImage": "https://images.unsplash.com/photo-1606664515524-ed2f786a0bd6?w=1600&q=85&auto=format&fit=crop",
+  "images": [
+    {
+      "src": "https://images.unsplash.com/photo-1606664515524-ed2f786a0bd6?w=1600&q=85&auto=format&fit=crop",
+      "alt": "Meridian 1.5 in graphite, three-quarter front",
+      "type": "EXTERIOR"
+    },
+    {
+      "src": "https://images.unsplash.com/photo-1619767886558-efdc259cde1a?w=1600&q=85&auto=format&fit=crop",
+      "alt": "Meridian 1.5 in black on the move",
+      "type": "EXTERIOR"
+    },
+    {
+      "src": "https://images.unsplash.com/photo-1621007947382-bb3c3994e3fb?w=1600&q=85&auto=format&fit=crop",
+      "alt": "Meridian 1.5 parked on a city street at dusk",
+      "type": "EXTERIOR"
+    },
+    {
+      "src": "https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?w=1600&q=85&auto=format&fit=crop",
+      "alt": "Meridian 1.5 cabin on an evening commute",
+      "type": "INTERIOR"
+    },
+    {
+      "src": "https://images.unsplash.com/photo-1542282088-fe8426682b8f?w=1600&q=85&auto=format&fit=crop",
+      "alt": "Meridian 1.5 LED headlamp signature",
+      "type": "DETAIL"
+    },
+    {
+      "src": "https://images.unsplash.com/photo-1555215695-3004980ad54e?w=1600&q=85&auto=format&fit=crop",
+      "alt": "Meridian 1.5 on a palm-lined boulevard",
+      "type": "LIFESTYLE"
+    }
+  ],
+  "colors": {
+    "exterior": [
+      {
+        "name": "Pearl White",
+        "hex": "#EEEAE1",
+        "metallic": false,
+        "upcharge": 0
+      },
+      {
+        "name": "Graphite Metallic",
+        "hex": "#2A2A2A",
+        "metallic": true,
+        "upcharge": 1500
+      },
+      {
+        "name": "Deep Marine",
+        "hex": "#1F2C3A",
+        "metallic": true,
+        "upcharge": 1500
+      },
+      {
+        "name": "Crimson Pearl",
+        "hex": "#7A1F1F",
+        "metallic": true,
+        "upcharge": 3500
+      }
+    ],
+    "interior": [
+      {
+        "name": "Charcoal",
+        "hex": "#262626",
+        "upcharge": 3500
+      },
+      {
+        "name": "Caramel",
+        "hex": "#7B5430",
+        "upcharge": 3500
+      }
+    ]
+  },
+  "trims": [
+    {
+      "name": "Standard",
+      "price": 96800,
+      "engineSize": 1.5,
+      "horsepower": 121,
+      "torque": 145,
+      "transmission": "CVT",
+      "fuelType": "PETROL",
+      "drivetrain": "FWD",
+      "fuelEconomy": 18.2,
+      "zeroToHundred": 11.4,
+      "topSpeed": 185,
+      "seats": 5,
+      "doors": 4,
+      "cargoCapacity": 510,
+      "features": [
+        "Forward collision warning",
+        "Lane departure assist",
+        "Apple CarPlay & Android Auto",
+        "LED headlights",
+        "Cruise control"
+      ],
+      "options": [
+        {
+          "name": "Adaptive Cruise Control",
+          "standard": false
+        },
+        {
+          "name": "Blind-Spot Monitoring",
+          "standard": false
+        },
+        {
+          "name": "Wireless Charging Pad",
+          "standard": true
+        },
+        {
+          "name": "Heated & Ventilated Seats",
+          "standard": false
+        }
+      ]
+    },
+    {
+      "name": "Executive",
+      "price": 108400,
+      "engineSize": 1.5,
+      "horsepower": 121,
+      "torque": 145,
+      "transmission": "CVT",
+      "fuelType": "PETROL",
+      "drivetrain": "FWD",
+      "fuelEconomy": 17.8,
+      "zeroToHundred": 11.2,
+      "topSpeed": 185,
+      "seats": 5,
+      "doors": 4,
+      "cargoCapacity": 510,
+      "features": [
+        "Adaptive cruise control with lane-centring",
+        "Blind-spot monitoring",
+        "Heated front seats",
+        "Wireless phone charging",
+        "Premium audio (8 speakers)",
+        "Leather steering wheel"
+      ],
+      "options": [
+        {
+          "name": "Adaptive Cruise Control",
+          "standard": true
+        },
+        {
+          "name": "Blind-Spot Monitoring",
+          "standard": true
+        },
+        {
+          "name": "Wireless Charging Pad",
+          "standard": true
+        },
+        {
+          "name": "Heated & Ventilated Seats",
+          "standard": true
+        },
+        {
+          "name": "Panoramic Sunroof",
+          "standard": false
+        }
+      ]
+    }
+  ],
+  "stock": [
+    {
+      "vin": "WBAMER20260000001",
+      "trim": "Standard",
+      "exteriorColor": "Pearl White",
+      "interiorColor": "Charcoal",
+      "options": [
+        "Adaptive Cruise Control",
+        "Blind-Spot Monitoring"
+      ],
+      "status": "AVAILABLE",
+      "arrivedDaysAgo": 35
+    },
+    {
+      "vin": "WBAMER20260000002",
+      "trim": "Standard",
+      "exteriorColor": "Graphite Metallic",
+      "interiorColor": "Charcoal",
+      "options": [
+        "Heated & Ventilated Seats"
+      ],
+      "status": "AVAILABLE",
+      "arrivedDaysAgo": 12
+    },
+    {
+      "vin": "WBAMER20260000003",
+      "trim": "Executive",
+      "exteriorColor": "Deep Marine",
+      "interiorColor": "Caramel",
+      "options": [
+        "Panoramic Sunroof"
+      ],
+      "status": "AVAILABLE",
+      "arrivedDaysAgo": 22
+    },
+    {
+      "vin": "WBAMER20260000004",
+      "trim": "Executive",
+      "exteriorColor": "Crimson Pearl",
+      "interiorColor": "Charcoal",
+      "options": [
+        "Panoramic Sunroof"
+      ],
+      "status": "IN_TRANSIT",
+      "expectedInDays": 14
+    }
+  ],
+  "model3d": {
+    "file": "model.glb",
+    "rotationY": -1.5707963267948966,
+    "length": 3.86,
+    "optimize": false,
+    "rig": {
+      "wheels": [
+        "Wheel_FL",
+        "Wheel_FR",
+        "Wheel_RL",
+        "Wheel_RR"
+      ],
+      "taillights": "^taillight$"
+    },
+    "interior": {
+      "rows": 2,
+      "replace": true
+    },
+    "credit": {
+      "title": "Generic Sedan Car",
+      "author": "assetfactory",
+      "license": "Sketchfab Standard",
+      "licenseUrl": "https://sketchfab.com/licenses",
+      "sourceUrl": "https://sketchfab.com/3d-models/generic-sedan-car-d43114aa25b144f0a11c564d74aaac1b",
+      "modified": true
+    }
+  }
+}

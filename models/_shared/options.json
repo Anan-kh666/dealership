@@ -1,0 +1,77 @@
+{
+  "$schema": "../_schema/options.schema.json",
+  "options": [
+    {
+      "name": "Adaptive Cruise Control",
+      "description": "Stop-and-go adaptive cruise with lane-centring assist.",
+      "category": "SAFETY",
+      "price": 0
+    },
+    {
+      "name": "360° Camera System",
+      "description": "Surround-view monitor with parking guidance.",
+      "category": "SAFETY",
+      "price": 3500
+    },
+    {
+      "name": "Blind-Spot Monitoring",
+      "description": "Visual and haptic warnings with rear cross-traffic alert.",
+      "category": "SAFETY",
+      "price": 0
+    },
+    {
+      "name": "Heated & Ventilated Seats",
+      "description": "Three-stage heating and cooling on front row.",
+      "category": "COMFORT",
+      "price": 4200
+    },
+    {
+      "name": "Panoramic Sunroof",
+      "description": "Full-length glass roof with electric sunshade.",
+      "category": "COMFORT",
+      "price": 5800
+    },
+    {
+      "name": "Premium Audio (12 Speakers)",
+      "description": "Mid-channel ambience tuning with subwoofer.",
+      "category": "TECH",
+      "price": 3800
+    },
+    {
+      "name": "Wireless Charging Pad",
+      "description": "Qi pad in centre console with cooling.",
+      "category": "TECH",
+      "price": 0
+    },
+    {
+      "name": "Head-Up Display",
+      "description": "Full-colour windscreen projection with navigation cues.",
+      "category": "TECH",
+      "price": 2800
+    },
+    {
+      "name": "Sport Suspension",
+      "description": "Adaptive dampers with three drive modes.",
+      "category": "PERFORMANCE",
+      "price": 6500
+    },
+    {
+      "name": "20\" Alloy Wheels",
+      "description": "Diamond-cut machined finish.",
+      "category": "EXTERIOR",
+      "price": 4500
+    },
+    {
+      "name": "Nappa Leather Upholstery",
+      "description": "Hand-stitched semi-aniline leather seating.",
+      "category": "INTERIOR",
+      "price": 8900
+    },
+    {
+      "name": "Tow Package",
+      "description": "Trailer hitch with integrated brake controller.",
+      "category": "PERFORMANCE",
+      "price": 3200
+    }
+  ]
+}

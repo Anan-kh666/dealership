@@ -1,122 +1,160 @@
 "use client";
 
 /* ------------------------------------------------------------------
- * TODO: replace placeholder geometry with real GLB asset.
- *
- * Each model should ship its own glTF body at /public/models/{slug}.glb,
- * loaded via useGLTF from @react-three/drei:
- *
- *   const { scene } = useGLTF(`/models/${modelSlug}.glb`);
- *
- * Materials inside the GLB should expose a "Body" mesh whose material
- * accepts a colour override (the configurator binds bodyHex to it). Wheels
- * should be separate sub-meshes so they can be swapped per trim.
+ * Stylised stand-in for models without a real .glb (see models/README.md).
+ * Shares the stage's motion state, so it drives in with rolling wheels,
+ * fades between colours and lights up just like a real model.
  * ------------------------------------------------------------------ */
 
 import * as React from "react";
 import * as THREE from "three";
+import { useFrame } from "@react-three/fiber";
+import { RoundedBox } from "@react-three/drei";
+import { damp, useMotion } from "./motion";
 
 interface PlaceholderCarProps {
   bodyHex: string;
   /** Visual variant for wheels — derived from trim level since the schema has no wheel entity. */
   wheelStyle: "standard" | "sport";
-  /** Interior accent — shown as a thin band on the side. */
+  /** Interior colour — visible through the glass as the seat tone. */
   interiorHex: string;
 }
+
+const WHEEL_X = 1.18;
+const TRACK_Z = 0.74;
 
 export function PlaceholderCar({
   bodyHex,
   wheelStyle,
   interiorHex,
 }: PlaceholderCarProps): React.ReactElement {
-  const wheelRadius = wheelStyle === "sport" ? 0.42 : 0.36;
-  const wheelSegments = wheelStyle === "sport" ? 32 : 16;
-  const wheelColor = wheelStyle === "sport" ? "#1a1a1a" : "#2a2a2a";
+  const sport = wheelStyle === "sport";
+  const wheelRadius = sport ? 0.4 : 0.36;
+  const rideHeight = sport ? 0.1 : 0.14;
+  const motion = useMotion();
+
+  const paint = React.useMemo(
+    () =>
+      new THREE.MeshPhysicalMaterial({
+        color: bodyHex,
+        metalness: 0.6,
+        roughness: 0.28,
+        clearcoat: 1,
+        clearcoatRoughness: 0.06,
+      }),
+    // Created once; colour is eased in the frame loop below.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [],
+  );
+  const seats = React.useMemo(
+    () => new THREE.MeshStandardMaterial({ color: interiorHex, roughness: 0.7 }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [],
+  );
+  const head = React.useMemo(
+    () => new THREE.MeshStandardMaterial({ color: "#ffffff", emissive: "#fff6e6", toneMapped: false }),
+    [],
+  );
+  const tail = React.useMemo(
+    () => new THREE.MeshStandardMaterial({ color: "#5a0b0b", emissive: "#ff1a1a", toneMapped: false }),
+    [],
+  );
+  React.useEffect(
+    () => () => {
+      for (const m of [paint, seats, head, tail]) m.dispose();
+    },
+    [paint, seats, head, tail],
+  );
+
+  const bodyTarget = React.useMemo(() => new THREE.Color(), []);
+  const seatTarget = React.useMemo(() => new THREE.Color(), []);
+  const wheels = React.useRef<(THREE.Group | null)[]>([]);
+
+  useFrame((_, rawDt) => {
+    const dt = Math.min(rawDt, 0.1);
+    const m = motion.current;
+    const k = damp(7, dt);
+    paint.color.lerp(bodyTarget.set(bodyHex), k);
+    seats.color.lerp(seatTarget.set(interiorHex), k);
+    head.emissiveIntensity = 5 * m.lightsOn;
+    tail.emissiveIntensity = 0.8 * m.lightsOn + 4 * m.braking;
+    for (const w of wheels.current) if (w) w.rotation.z = -m.travel / wheelRadius;
+  });
 
   return (
-    <group position={[0, -0.2, 0]}>
+    <group>
       {/* Lower body */}
-      <mesh castShadow receiveShadow position={[0, 0.4, 0]}>
-        <boxGeometry args={[3.2, 0.55, 1.4]} />
-        <meshStandardMaterial
-          color={bodyHex}
-          metalness={0.55}
-          roughness={0.35}
-        />
-      </mesh>
-      {/* Cabin / greenhouse */}
-      <mesh castShadow receiveShadow position={[0.05, 0.95, 0]}>
-        <boxGeometry args={[1.85, 0.6, 1.25]} />
-        <meshStandardMaterial
-          color={bodyHex}
-          metalness={0.5}
-          roughness={0.4}
-        />
-      </mesh>
-      {/* Window band — frosted glass-ish */}
-      <mesh position={[0.05, 1.0, 0]}>
-        <boxGeometry args={[1.7, 0.35, 1.27]} />
-        <meshStandardMaterial
-          color="#1a1a1a"
-          metalness={0.2}
-          roughness={0.05}
-          opacity={0.85}
-          transparent
-        />
-      </mesh>
-      {/* Side accent band — shows interior colour subtly */}
-      <mesh position={[0, 0.25, 0.71]}>
-        <boxGeometry args={[3.0, 0.04, 0.005]} />
-        <meshStandardMaterial color={interiorHex} roughness={0.6} />
-      </mesh>
-      <mesh position={[0, 0.25, -0.71]}>
-        <boxGeometry args={[3.0, 0.04, 0.005]} />
-        <meshStandardMaterial color={interiorHex} roughness={0.6} />
-      </mesh>
+      <RoundedBox
+        args={[3.4, 0.5, 1.5]}
+        radius={0.1}
+        smoothness={6}
+        position={[0, wheelRadius + rideHeight + 0.1, 0]}
+        material={paint}
+      />
 
-      {/* Wheels */}
-      {wheelPositions.map(([x, z], i) => (
-        <group key={i} position={[x, wheelRadius, z]}>
-          <mesh rotation={[Math.PI / 2, 0, 0]} castShadow>
-            <cylinderGeometry
-              args={[wheelRadius, wheelRadius, 0.28, wheelSegments]}
-            />
-            <meshStandardMaterial color={wheelColor} roughness={0.85} />
+      {/* Glasshouse: pillars in paint, tinted glass inset */}
+      <group position={[-0.12, wheelRadius + rideHeight + 0.56, 0]}>
+        <RoundedBox args={[1.95, 0.46, 1.34]} radius={0.12} smoothness={6} material={paint} />
+        <RoundedBox args={[1.99, 0.3, 1.36]} radius={0.08} smoothness={4} position={[0, 0.03, 0]}>
+          <meshPhysicalMaterial
+            color="#0d1014"
+            metalness={0.1}
+            roughness={0.05}
+            transmission={0.15}
+            transparent
+            opacity={0.92}
+          />
+        </RoundedBox>
+        <mesh position={[0.15, -0.08, 0]} material={seats}>
+          <boxGeometry args={[1.2, 0.18, 1.0]} />
+        </mesh>
+      </group>
+
+      {/* Lights */}
+      {[TRACK_Z - 0.18, -(TRACK_Z - 0.18)].map((z) => (
+        <React.Fragment key={z}>
+          <mesh position={[1.7, wheelRadius + rideHeight + 0.2, z]} material={head}>
+            <boxGeometry args={[0.02, 0.07, 0.34]} />
           </mesh>
-          {/* Hub cap */}
-          <mesh rotation={[Math.PI / 2, 0, 0]} position={[0, 0, 0.145]}>
-            <cylinderGeometry
-              args={[wheelRadius * 0.55, wheelRadius * 0.55, 0.02, wheelSegments]}
-            />
-            <meshStandardMaterial
-              color="#cfcfcf"
-              metalness={0.85}
-              roughness={0.25}
-            />
+          <mesh position={[-1.7, wheelRadius + rideHeight + 0.22, z]} material={tail}>
+            <boxGeometry args={[0.02, 0.06, 0.38]} />
           </mesh>
-        </group>
+        </React.Fragment>
       ))}
 
-      {/* Ground shadow plane (subtle) */}
-      <mesh
-        rotation={[-Math.PI / 2, 0, 0]}
-        position={[0, -0.001, 0]}
-        receiveShadow
-      >
-        <planeGeometry args={[7, 4]} />
-        <shadowMaterial opacity={0.18} />
-      </mesh>
+      {/* Wheels — the outer group holds position, the inner one rolls. */}
+      {WHEEL_POSITIONS.map(([x, side], i) => (
+        <group key={`${x}-${side}`} position={[x, wheelRadius, side * TRACK_Z]}>
+          <group
+            ref={(g) => {
+              wheels.current[i] = g;
+            }}
+          >
+            <mesh rotation={[Math.PI / 2, 0, 0]}>
+              <cylinderGeometry args={[wheelRadius, wheelRadius, 0.3, 40]} />
+              <meshStandardMaterial color="#151515" roughness={0.9} />
+            </mesh>
+            {/* Spoked rim so the rotation reads */}
+            <mesh rotation={[Math.PI / 2, 0, 0]} position={[0, 0, side * 0.151]}>
+              <cylinderGeometry
+                args={[wheelRadius * 0.68, wheelRadius * 0.68, 0.01, sport ? 10 : 5]}
+              />
+              <meshStandardMaterial
+                color={sport ? "#2b2b2b" : "#c9c9c9"}
+                metalness={0.9}
+                roughness={0.25}
+              />
+            </mesh>
+          </group>
+        </group>
+      ))}
     </group>
   );
 }
 
-const wheelPositions: [number, number][] = [
-  [-1.15, 0.7],
-  [1.15, 0.7],
-  [-1.15, -0.7],
-  [1.15, -0.7],
+const WHEEL_POSITIONS: [number, 1 | -1][] = [
+  [-WHEEL_X, 1],
+  [WHEEL_X, 1],
+  [-WHEEL_X, -1],
+  [WHEEL_X, -1],
 ];
-
-// Avoid an unused-import warning: THREE is referenced via the JSX namespace
-// only, but keeping the explicit import makes type augmentation discoverable.
-void THREE;

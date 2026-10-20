@@ -1,0 +1,257 @@
+{
+  "$schema": "../_schema/vehicle.schema.json",
+  "published": true,
+  "make": "Halcyon",
+  "name": "Halcyon CX",
+  "year": 2026,
+  "bodyType": "HATCHBACK",
+  "description": "A compact crossover sized for tight Klang Valley parking lots that doesn't make you choose between drive feel and daily comfort. Mild-hybrid efficiency, thoughtful tech, and a cabin you can live with.",
+  "featured": false,
+  "displayOrder": 3,
+  "highlights": [
+    "Mild-hybrid: 17.0 km/L combined",
+    "Tight 5.2m turning radius",
+    "Adaptive cruise as standard",
+    "Cargo area swallows a stroller plus weekly groceries"
+  ],
+  "seo": {
+    "title": "Halcyon CX — Compact crossover with daily ease",
+    "description": "The Halcyon CX is a mild-hybrid compact crossover with adaptive cruise as standard, a tight 5.2m turning radius, and honest 17 km/L economy."
+  },
+  "heroImage": "https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=1600&q=85&auto=format&fit=crop",
+  "images": [
+    {
+      "src": "https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=1600&q=85&auto=format&fit=crop",
+      "alt": "Halcyon CX parked in covered urban garage",
+      "type": "EXTERIOR"
+    },
+    {
+      "src": "https://images.unsplash.com/photo-1609521263047-f8f205293f24?w=1600&q=85&auto=format&fit=crop",
+      "alt": "Halcyon CX three-quarter front at night",
+      "type": "EXTERIOR"
+    },
+    {
+      "src": "https://images.unsplash.com/photo-1541899481282-d53bffe3c35d?w=1600&q=85&auto=format&fit=crop",
+      "alt": "Halcyon CX in deep blue, three-quarter front",
+      "type": "EXTERIOR"
+    },
+    {
+      "src": "https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?w=1600&q=85&auto=format&fit=crop",
+      "alt": "Halcyon CX cabin and dashboard",
+      "type": "INTERIOR"
+    },
+    {
+      "src": "https://images.unsplash.com/photo-1550355291-bbee04a92027?w=1600&q=85&auto=format&fit=crop",
+      "alt": "Halcyon CX front grille and wheel detail",
+      "type": "DETAIL"
+    },
+    {
+      "src": "https://images.unsplash.com/photo-1621007947382-bb3c3994e3fb?w=1600&q=85&auto=format&fit=crop",
+      "alt": "Halcyon CX in the city after dark",
+      "type": "LIFESTYLE"
+    }
+  ],
+  "colors": {
+    "exterior": [
+      {
+        "name": "Pearl White",
+        "hex": "#EEEAE1",
+        "metallic": false,
+        "upcharge": 0
+      },
+      {
+        "name": "Graphite Metallic",
+        "hex": "#2A2A2A",
+        "metallic": true,
+        "upcharge": 1500
+      },
+      {
+        "name": "Deep Marine",
+        "hex": "#1F2C3A",
+        "metallic": true,
+        "upcharge": 1500
+      },
+      {
+        "name": "Sienna Bronze",
+        "hex": "#B08D57",
+        "metallic": true,
+        "upcharge": 3500
+      }
+    ],
+    "interior": [
+      {
+        "name": "Charcoal",
+        "hex": "#262626",
+        "upcharge": 3500
+      },
+      {
+        "name": "Caramel",
+        "hex": "#7B5430",
+        "upcharge": 3500
+      }
+    ]
+  },
+  "trims": [
+    {
+      "name": "Active",
+      "price": 142500,
+      "engineSize": 1.5,
+      "horsepower": 158,
+      "torque": 220,
+      "transmission": "DCT",
+      "fuelType": "HYBRID",
+      "drivetrain": "FWD",
+      "fuelEconomy": 17,
+      "zeroToHundred": 9.4,
+      "topSpeed": 200,
+      "seats": 5,
+      "doors": 5,
+      "cargoCapacity": 460,
+      "features": [
+        "Adaptive cruise with stop-and-go",
+        "Lane-centring assist",
+        "Wireless phone charging",
+        "Apple CarPlay & Android Auto",
+        "LED projector headlights"
+      ],
+      "options": [
+        {
+          "name": "Adaptive Cruise Control",
+          "standard": true
+        },
+        {
+          "name": "Wireless Charging Pad",
+          "standard": true
+        },
+        {
+          "name": "Blind-Spot Monitoring",
+          "standard": true
+        },
+        {
+          "name": "Panoramic Sunroof",
+          "standard": false
+        },
+        {
+          "name": "20\" Alloy Wheels",
+          "standard": false
+        }
+      ]
+    },
+    {
+      "name": "Sport",
+      "price": 157000,
+      "engineSize": 1.5,
+      "horsepower": 168,
+      "torque": 240,
+      "transmission": "DCT",
+      "fuelType": "HYBRID",
+      "drivetrain": "FWD",
+      "fuelEconomy": 16.4,
+      "zeroToHundred": 8.7,
+      "topSpeed": 210,
+      "seats": 5,
+      "doors": 5,
+      "cargoCapacity": 460,
+      "features": [
+        "Sport suspension",
+        "Heated front seats",
+        "Panoramic sunroof",
+        "Head-up display",
+        "20\" alloy wheels",
+        "Premium audio (10 speakers)"
+      ],
+      "options": [
+        {
+          "name": "Adaptive Cruise Control",
+          "standard": true
+        },
+        {
+          "name": "Wireless Charging Pad",
+          "standard": true
+        },
+        {
+          "name": "Blind-Spot Monitoring",
+          "standard": true
+        },
+        {
+          "name": "Panoramic Sunroof",
+          "standard": true
+        },
+        {
+          "name": "Sport Suspension",
+          "standard": true
+        },
+        {
+          "name": "20\" Alloy Wheels",
+          "standard": true
+        },
+        {
+          "name": "Head-Up Display",
+          "standard": true
+        }
+      ]
+    }
+  ],
+  "stock": [
+    {
+      "vin": "WBAHAL20260000001",
+      "trim": "Active",
+      "exteriorColor": "Sienna Bronze",
+      "interiorColor": "Charcoal",
+      "options": [
+        "Panoramic Sunroof",
+        "20\" Alloy Wheels"
+      ],
+      "status": "AVAILABLE",
+      "arrivedDaysAgo": 5
+    },
+    {
+      "vin": "WBAHAL20260000002",
+      "trim": "Active",
+      "exteriorColor": "Pearl White",
+      "interiorColor": "Charcoal",
+      "options": [
+        "20\" Alloy Wheels"
+      ],
+      "status": "SOLD",
+      "arrivedDaysAgo": 45
+    },
+    {
+      "vin": "WBAHAL20260000003",
+      "trim": "Sport",
+      "exteriorColor": "Deep Marine",
+      "interiorColor": "Caramel",
+      "options": [],
+      "status": "AVAILABLE",
+      "arrivedDaysAgo": 24
+    }
+  ],
+  "model3d": {
+    "file": "model.glb",
+    "rotationY": 3.141592653589793,
+    "length": 4,
+    "optimize": false,
+    "rig": {
+      "wheels": [
+        "Wheel_FL",
+        "Wheel_FR",
+        "Wheel_RL",
+        "Wheel_RR"
+      ],
+      "headlights": "^headlight$|^led_light$",
+      "taillights": "^taillight$"
+    },
+    "interior": {
+      "rows": 2,
+      "replace": true
+    },
+    "credit": {
+      "title": "SHC MC Free Promotion Car",
+      "author": "denniswoo1993",
+      "license": "CC BY 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/4.0/",
+      "sourceUrl": "https://sketchfab.com/3d-models/shc-mc-free-promotion-car-cfaabdec76a74b68a48ba5657b6d9aee",
+      "modified": true
+    }
+  }
+}

@@ -1,0 +1,289 @@
+{
+  "$schema": "../_schema/vehicle.schema.json",
+  "published": true,
+  "make": "Continental",
+  "name": "Continental GT",
+  "year": 2026,
+  "bodyType": "COUPE",
+  "description": "The flagship grand tourer. A 4.0L twin-turbo V8 with 48V mild-hybrid assist, hand-finished cabin, and adaptive air suspension that smooths a Genting climb into something effortless.",
+  "featured": true,
+  "displayOrder": 5,
+  "highlights": [
+    "4.0L twin-turbo V8 — 542 hp",
+    "Hand-stitched Nappa cabin",
+    "Adaptive air suspension with three drive modes",
+    "Bespoke programme: 14 paint, 8 leather options"
+  ],
+  "seo": {
+    "title": "2026 Continental GT — Flagship grand tourer",
+    "description": "The 2026 Continental GT is our flagship grand tourer with a 542 hp twin-turbo V8, hand-stitched Nappa cabin, and adaptive air suspension."
+  },
+  "heroImage": "https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=1600&q=85&auto=format&fit=crop",
+  "images": [
+    {
+      "src": "https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=1600&q=85&auto=format&fit=crop",
+      "alt": "Continental GT in low-light studio",
+      "type": "EXTERIOR"
+    },
+    {
+      "src": "https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?w=1600&q=85&auto=format&fit=crop",
+      "alt": "Continental GT three-quarter front",
+      "type": "EXTERIOR"
+    },
+    {
+      "src": "https://images.unsplash.com/photo-1485291571150-772bcfc10da5?w=1600&q=85&auto=format&fit=crop",
+      "alt": "Continental GT side profile in silhouette",
+      "type": "EXTERIOR"
+    },
+    {
+      "src": "https://images.unsplash.com/photo-1626668893632-6f3a4466d22f?w=1600&q=85&auto=format&fit=crop",
+      "alt": "Continental GT rear lamps in the studio",
+      "type": "EXTERIOR"
+    },
+    {
+      "src": "https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?w=1600&q=85&auto=format&fit=crop",
+      "alt": "Continental GT hand-stitched cabin",
+      "type": "INTERIOR"
+    },
+    {
+      "src": "https://images.unsplash.com/photo-1542282088-fe8426682b8f?w=1600&q=85&auto=format&fit=crop",
+      "alt": "Continental GT headlamp detail",
+      "type": "DETAIL"
+    },
+    {
+      "src": "https://images.unsplash.com/photo-1617814076367-b759c7d7e738?w=1600&q=85&auto=format&fit=crop",
+      "alt": "Continental GT at the marina",
+      "type": "LIFESTYLE"
+    },
+    {
+      "src": "https://images.unsplash.com/photo-1580273916550-e323be2ae537?w=1600&q=85&auto=format&fit=crop",
+      "alt": "Continental GT on a coastal road at dusk",
+      "type": "LIFESTYLE"
+    }
+  ],
+  "colors": {
+    "exterior": [
+      {
+        "name": "Pearl White",
+        "hex": "#EEEAE1",
+        "metallic": false,
+        "upcharge": 0
+      },
+      {
+        "name": "Graphite Metallic",
+        "hex": "#2A2A2A",
+        "metallic": true,
+        "upcharge": 1500
+      },
+      {
+        "name": "Deep Marine",
+        "hex": "#1F2C3A",
+        "metallic": true,
+        "upcharge": 1500
+      },
+      {
+        "name": "Crimson Pearl",
+        "hex": "#7A1F1F",
+        "metallic": true,
+        "upcharge": 3500
+      }
+    ],
+    "interior": [
+      {
+        "name": "Charcoal",
+        "hex": "#262626",
+        "upcharge": 3500
+      },
+      {
+        "name": "Caramel",
+        "hex": "#7B5430",
+        "upcharge": 3500
+      }
+    ]
+  },
+  "trims": [
+    {
+      "name": "GT V8",
+      "price": 488000,
+      "engineSize": 4,
+      "horsepower": 542,
+      "torque": 770,
+      "transmission": "DCT",
+      "fuelType": "PLUGIN_HYBRID",
+      "drivetrain": "AWD",
+      "fuelEconomy": 11.6,
+      "zeroToHundred": 4,
+      "topSpeed": 318,
+      "seats": 4,
+      "doors": 2,
+      "cargoCapacity": 358,
+      "features": [
+        "Hand-stitched Nappa leather",
+        "Adaptive air suspension",
+        "Naim 18-speaker audio",
+        "22-way adjustable seats with massage",
+        "Rotating display fascia",
+        "20\" forged alloys"
+      ],
+      "options": [
+        {
+          "name": "Adaptive Cruise Control",
+          "standard": true
+        },
+        {
+          "name": "Blind-Spot Monitoring",
+          "standard": true
+        },
+        {
+          "name": "Heated & Ventilated Seats",
+          "standard": true
+        },
+        {
+          "name": "Panoramic Sunroof",
+          "standard": true
+        },
+        {
+          "name": "Premium Audio (12 Speakers)",
+          "standard": true
+        },
+        {
+          "name": "Sport Suspension",
+          "standard": true
+        },
+        {
+          "name": "20\" Alloy Wheels",
+          "standard": true
+        },
+        {
+          "name": "Nappa Leather Upholstery",
+          "standard": true
+        },
+        {
+          "name": "Head-Up Display",
+          "standard": true
+        }
+      ]
+    },
+    {
+      "name": "GT Speed",
+      "price": 568000,
+      "engineSize": 4,
+      "horsepower": 626,
+      "torque": 820,
+      "transmission": "DCT",
+      "fuelType": "PLUGIN_HYBRID",
+      "drivetrain": "AWD",
+      "fuelEconomy": 11,
+      "zeroToHundred": 3.6,
+      "topSpeed": 335,
+      "seats": 4,
+      "doors": 2,
+      "cargoCapacity": 358,
+      "features": [
+        "Performance-tuned air suspension",
+        "Carbon ceramic brakes",
+        "Diamond-quilted Nappa upholstery",
+        "Naim 18-speaker audio",
+        "22\" forged sport alloys",
+        "Akrapovič sport exhaust"
+      ],
+      "options": [
+        {
+          "name": "Adaptive Cruise Control",
+          "standard": true
+        },
+        {
+          "name": "Blind-Spot Monitoring",
+          "standard": true
+        },
+        {
+          "name": "Heated & Ventilated Seats",
+          "standard": true
+        },
+        {
+          "name": "Panoramic Sunroof",
+          "standard": true
+        },
+        {
+          "name": "Premium Audio (12 Speakers)",
+          "standard": true
+        },
+        {
+          "name": "Sport Suspension",
+          "standard": true
+        },
+        {
+          "name": "20\" Alloy Wheels",
+          "standard": true
+        },
+        {
+          "name": "Nappa Leather Upholstery",
+          "standard": true
+        },
+        {
+          "name": "Head-Up Display",
+          "standard": true
+        },
+        {
+          "name": "360° Camera System",
+          "standard": true
+        }
+      ]
+    }
+  ],
+  "stock": [
+    {
+      "vin": "WBACON20260000001",
+      "trim": "GT V8",
+      "exteriorColor": "Crimson Pearl",
+      "interiorColor": "Caramel",
+      "options": [],
+      "status": "AVAILABLE",
+      "arrivedDaysAgo": 50
+    },
+    {
+      "vin": "WBACON20260000002",
+      "trim": "GT V8",
+      "exteriorColor": "Pearl White",
+      "interiorColor": "Charcoal",
+      "options": [],
+      "status": "AVAILABLE",
+      "arrivedDaysAgo": 3
+    },
+    {
+      "vin": "WBACON20260000003",
+      "trim": "GT Speed",
+      "exteriorColor": "Graphite Metallic",
+      "interiorColor": "Charcoal",
+      "options": [],
+      "status": "IN_TRANSIT",
+      "expectedInDays": 21
+    }
+  ],
+  "model3d": {
+    "file": "model.glb",
+    "rotationY": 1.5707963267948966,
+    "length": 4.02,
+    "optimize": false,
+    "materials": {
+      "interior": "^interior$"
+    },
+    "rig": {
+      "wheels": [
+        "DEF-Wheel.Ft.L_08",
+        "DEF-Wheel.Ft.R_09",
+        "DEF-Wheel.Bk.L_010",
+        "DEF-Wheel.Bk.R_011"
+      ],
+      "taillights": "^taillight"
+    },
+    "credit": {
+      "title": "Generic Sport Coupé Car",
+      "author": "MMC Works",
+      "license": "CC BY 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/4.0/",
+      "sourceUrl": "https://sketchfab.com/3d-models/generic-sport-coupe-car-820a13c4831c41959ce75e6c2014e882",
+      "modified": true
+    }
+  }
+}

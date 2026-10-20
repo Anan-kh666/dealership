@@ -42,3 +42,9 @@ coverage/
 # Caches
 .eslintcache
 .cache/
+
+# Vehicle 3D files + images published from /models by @dealership/vehicles
+apps/web/public/vehicles/
+
+# Blender autosave backups next to vehicle .blend files
+models/**/*.blend1

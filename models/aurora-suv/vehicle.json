@@ -1,0 +1,324 @@
+{
+  "$schema": "../_schema/vehicle.schema.json",
+  "published": true,
+  "make": "Aurora",
+  "name": "Aurora SUV",
+  "year": 2026,
+  "bodyType": "SUV",
+  "description": "A seven-seat family SUV with a hybrid powertrain that genuinely sips, third-row seats adults can sit in, and a quiet cabin that handles a Penang weekend without complaint.",
+  "featured": true,
+  "displayOrder": 2,
+  "highlights": [
+    "True 7-seat layout — adults fit",
+    "Hybrid range up to 950 km",
+    "Eight airbags + Level 2 driver assist",
+    "Quiet cabin tuned for highway long-haul"
+  ],
+  "seo": {
+    "title": "Aurora SUV — Hybrid 7-seat family SUV",
+    "description": "The Aurora SUV is a hybrid 7-seater with a true third row, 950km range, and a quiet cabin tuned for the long road. From RM 168,000."
+  },
+  "heroImage": "https://images.unsplash.com/photo-1583870996815-55daf7122b08?w=1600&q=85&auto=format&fit=crop",
+  "images": [
+    {
+      "src": "https://images.unsplash.com/photo-1583870996815-55daf7122b08?w=1600&q=85&auto=format&fit=crop",
+      "alt": "Aurora SUV in graphite, low-light gallery",
+      "type": "EXTERIOR"
+    },
+    {
+      "src": "https://images.unsplash.com/photo-1590362891991-f776e747a588?w=1600&q=85&auto=format&fit=crop",
+      "alt": "Aurora SUV in pearl white, head-on",
+      "type": "EXTERIOR"
+    },
+    {
+      "src": "https://images.unsplash.com/photo-1563720223185-11003d516935?w=1600&q=85&auto=format&fit=crop",
+      "alt": "Aurora SUV in black, front view",
+      "type": "EXTERIOR"
+    },
+    {
+      "src": "https://images.unsplash.com/photo-1517524008697-84bbe3c3fd98?w=1600&q=85&auto=format&fit=crop",
+      "alt": "Aurora SUV on a forest road",
+      "type": "EXTERIOR"
+    },
+    {
+      "src": "https://images.unsplash.com/photo-1610647752706-3bb12232b3ab?w=1600&q=85&auto=format&fit=crop",
+      "alt": "Aurora SUV dashboard and 12-inch touchscreen",
+      "type": "INTERIOR"
+    },
+    {
+      "src": "https://images.unsplash.com/photo-1562705841-c4934bb2b31b?w=1600&q=85&auto=format&fit=crop",
+      "alt": "Aurora SUV on an open dirt road at first light",
+      "type": "LIFESTYLE"
+    },
+    {
+      "src": "https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?w=1600&q=85&auto=format&fit=crop",
+      "alt": "Aurora SUV on a weekend road trip",
+      "type": "LIFESTYLE"
+    }
+  ],
+  "colors": {
+    "exterior": [
+      {
+        "name": "Pearl White",
+        "hex": "#EEEAE1",
+        "metallic": false,
+        "upcharge": 0
+      },
+      {
+        "name": "Graphite Metallic",
+        "hex": "#2A2A2A",
+        "metallic": true,
+        "upcharge": 1500
+      },
+      {
+        "name": "Deep Marine",
+        "hex": "#1F2C3A",
+        "metallic": true,
+        "upcharge": 1500
+      },
+      {
+        "name": "Forest Green",
+        "hex": "#2E4A36",
+        "metallic": true,
+        "upcharge": 3500
+      }
+    ],
+    "interior": [
+      {
+        "name": "Charcoal",
+        "hex": "#262626",
+        "upcharge": 3500
+      },
+      {
+        "name": "Caramel",
+        "hex": "#7B5430",
+        "upcharge": 3500
+      }
+    ]
+  },
+  "trims": [
+    {
+      "name": "Comfort",
+      "price": 168000,
+      "engineSize": 2.5,
+      "horsepower": 215,
+      "torque": 240,
+      "transmission": "CVT",
+      "fuelType": "HYBRID",
+      "drivetrain": "FWD",
+      "fuelEconomy": 16.4,
+      "zeroToHundred": 8.6,
+      "topSpeed": 200,
+      "seats": 7,
+      "doors": 5,
+      "cargoCapacity": 580,
+      "features": [
+        "Hybrid synergy drive",
+        "Adaptive cruise control",
+        "Blind-spot monitoring",
+        "Tri-zone climate control",
+        "Apple CarPlay & Android Auto",
+        "LED headlights"
+      ],
+      "options": [
+        {
+          "name": "Adaptive Cruise Control",
+          "standard": true
+        },
+        {
+          "name": "Blind-Spot Monitoring",
+          "standard": true
+        },
+        {
+          "name": "Heated & Ventilated Seats",
+          "standard": false
+        },
+        {
+          "name": "Panoramic Sunroof",
+          "standard": false
+        }
+      ]
+    },
+    {
+      "name": "Premium",
+      "price": 188000,
+      "engineSize": 2.5,
+      "horsepower": 215,
+      "torque": 240,
+      "transmission": "CVT",
+      "fuelType": "HYBRID",
+      "drivetrain": "AWD",
+      "fuelEconomy": 15.8,
+      "zeroToHundred": 8.2,
+      "topSpeed": 205,
+      "seats": 7,
+      "doors": 5,
+      "cargoCapacity": 580,
+      "features": [
+        "All-wheel drive (e-AWD)",
+        "Heated and ventilated front seats",
+        "Panoramic sunroof",
+        "360° camera system",
+        "Premium audio (12 speakers)",
+        "Hands-free power tailgate"
+      ],
+      "options": [
+        {
+          "name": "Adaptive Cruise Control",
+          "standard": true
+        },
+        {
+          "name": "Blind-Spot Monitoring",
+          "standard": true
+        },
+        {
+          "name": "Heated & Ventilated Seats",
+          "standard": true
+        },
+        {
+          "name": "Panoramic Sunroof",
+          "standard": true
+        },
+        {
+          "name": "360° Camera System",
+          "standard": true
+        },
+        {
+          "name": "Premium Audio (12 Speakers)",
+          "standard": true
+        }
+      ]
+    },
+    {
+      "name": "Reserve",
+      "price": 208000,
+      "engineSize": 2.5,
+      "horsepower": 230,
+      "torque": 250,
+      "transmission": "CVT",
+      "fuelType": "HYBRID",
+      "drivetrain": "AWD",
+      "fuelEconomy": 15.2,
+      "zeroToHundred": 7.9,
+      "topSpeed": 210,
+      "seats": 7,
+      "doors": 5,
+      "cargoCapacity": 580,
+      "features": [
+        "Nappa leather upholstery",
+        "Head-up display",
+        "Adaptive air suspension",
+        "Massage front seats",
+        "Acoustic-laminated side glass",
+        "20\" alloy wheels"
+      ],
+      "options": [
+        {
+          "name": "Adaptive Cruise Control",
+          "standard": true
+        },
+        {
+          "name": "Blind-Spot Monitoring",
+          "standard": true
+        },
+        {
+          "name": "Heated & Ventilated Seats",
+          "standard": true
+        },
+        {
+          "name": "Panoramic Sunroof",
+          "standard": true
+        },
+        {
+          "name": "360° Camera System",
+          "standard": true
+        },
+        {
+          "name": "Premium Audio (12 Speakers)",
+          "standard": true
+        },
+        {
+          "name": "Nappa Leather Upholstery",
+          "standard": true
+        },
+        {
+          "name": "Head-Up Display",
+          "standard": true
+        },
+        {
+          "name": "20\" Alloy Wheels",
+          "standard": true
+        },
+        {
+          "name": "Tow Package",
+          "standard": false
+        }
+      ]
+    }
+  ],
+  "stock": [
+    {
+      "vin": "WBAAUR20260000001",
+      "trim": "Comfort",
+      "exteriorColor": "Pearl White",
+      "interiorColor": "Charcoal",
+      "options": [
+        "Heated & Ventilated Seats",
+        "Panoramic Sunroof"
+      ],
+      "status": "AVAILABLE",
+      "arrivedDaysAgo": 8
+    },
+    {
+      "vin": "WBAAUR20260000002",
+      "trim": "Premium",
+      "exteriorColor": "Graphite Metallic",
+      "interiorColor": "Caramel",
+      "options": [],
+      "status": "AVAILABLE",
+      "arrivedDaysAgo": 18
+    },
+    {
+      "vin": "WBAAUR20260000003",
+      "trim": "Reserve",
+      "exteriorColor": "Forest Green",
+      "interiorColor": "Caramel",
+      "options": [
+        "Tow Package"
+      ],
+      "status": "AVAILABLE",
+      "arrivedDaysAgo": 30
+    }
+  ],
+  "model3d": {
+    "file": "model.glb",
+    "rotationY": 1.5707963267948966,
+    "length": 3.93,
+    "optimize": false,
+    "materials": {
+      "glass": "^material\\.003$"
+    },
+    "rig": {
+      "wheels": [
+        "Wheel_FL",
+        "Wheel_FR",
+        "Wheel_RL",
+        "Wheel_RR"
+      ],
+      "headlights": "^headlight$",
+      "taillights": "^taillight$"
+    },
+    "interior": {
+      "rows": 2,
+      "replace": true
+    },
+    "credit": {
+      "title": "Concept car",
+      "author": "LagzDesign",
+      "license": "CC BY 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/4.0/",
+      "sourceUrl": "https://sketchfab.com/3d-models/concept-car-a4a27b16a57240fa818da3c6750d9cca",
+      "modified": true
+    }
+  }
+}
