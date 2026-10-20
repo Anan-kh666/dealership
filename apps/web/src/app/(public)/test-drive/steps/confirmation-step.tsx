@@ -9,6 +9,7 @@ import { normaliseMyPhone } from "@/lib/test-drive/phone";
 import { toZonedTime } from "date-fns-tz";
 import { KL_TZ } from "@/lib/test-drive/slots";
 import type { SuccessPayload } from "../test-drive-flow";
+import { createAccountFromBookingAction } from "../../../(auth)/actions";
 
 interface CreateResponse {
   id: string;
@@ -96,6 +97,26 @@ export function ConfirmationStep({
         return;
       }
       const payload = (await res.json()) as CreateResponse;
+
+      // Optional account creation never blocks the booking itself.
+      let account: SuccessPayload["account"];
+      if (details.createAccount && details.password.length < 8) {
+        // The password isn't persisted across reloads, so it can be missing.
+        account = "invalid";
+      } else if (details.createAccount) {
+        try {
+          const r = await createAccountFromBookingAction({
+            name: details.guestName.trim(),
+            email: details.guestEmail.trim(),
+            phone: normaliseMyPhone(details.guestPhone) ?? details.guestPhone.trim(),
+            password: details.password,
+          });
+          account = r.status;
+        } catch {
+          account = "invalid";
+        }
+      }
+
       const success: SuccessPayload = {
         id: payload.id,
         reference: payload.reference,
@@ -103,6 +124,7 @@ export function ConfirmationStep({
         vehicleLabel,
         guestName: details.guestName.trim(),
         guestEmail: details.guestEmail.trim(),
+        ...(account ? { account } : {}),
       };
       // Persist into the parent flow before clearing the store.
       onSuccess(success);

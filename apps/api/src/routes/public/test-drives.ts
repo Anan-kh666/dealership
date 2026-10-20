@@ -5,7 +5,7 @@ import { toZonedTime } from "date-fns-tz";
 import { createEvent } from "ics";
 import { render } from "@react-email/render";
 import { prisma, TestDriveStatus } from "@dealership/db";
-import { testDriveBookingSchema } from "@dealership/types";
+import { SITE, testDriveBookingSchema, testDriveReferenceFromId } from "@dealership/types";
 import {
   KL_TZ,
   SLOT_MINUTES_OF_DAY,
@@ -16,11 +16,11 @@ import {
   ymdInKL,
 } from "../../lib/slots.js";
 import { TestDriveConfirmationEmail } from "../../emails/test-drive-confirmation.js";
+import { adminNotificationRecipient, escapeHtml, sendMail } from "../../lib/mailer.js";
 
-const SHOWROOM_ADDRESS =
-  "Lot 12, Jalan Sultan Ismail, 50250 Petaling Jaya, Selangor";
-const SHOWROOM_PHONE = "+60 3 7801 2345";
-const WHATSAPP_URL = "https://wa.me/60378012345";
+const SHOWROOM_ADDRESS = SITE.address.oneLine;
+const SHOWROOM_PHONE = SITE.phone.display;
+const WHATSAPP_URL = SITE.whatsappUrl;
 
 const AvailabilityQuery = z.object({
   date: z
@@ -30,9 +30,6 @@ const AvailabilityQuery = z.object({
 
 const IdParams = z.object({ id: z.string().min(1) });
 
-function referenceFromId(id: string): string {
-  return `TD-${id.slice(-6).toUpperCase()}`;
-}
 
 async function fetchVehicleLabel(input: {
   modelId?: string | null;
@@ -175,7 +172,7 @@ export const testDrivesPublicRoutes: FastifyPluginAsyncZod = async (server) => {
           { isolationLevel: "Serializable" },
         );
 
-        // Stub email send — render and log payload.
+        // Confirmation email — failures never fail the booking.
         try {
           const { label } = await fetchVehicleLabel({
             modelId: created.modelId,
@@ -190,29 +187,39 @@ export const testDrivesPublicRoutes: FastifyPluginAsyncZod = async (server) => {
               vehicleLabel: label,
               formattedDate,
               formattedTime,
-              reference: referenceFromId(created.id),
+              reference: testDriveReferenceFromId(created.id),
               dealershipAddress: SHOWROOM_ADDRESS,
               dealershipPhone: SHOWROOM_PHONE,
               whatsappUrl: WHATSAPP_URL,
             }),
           );
-          server.log.info(
-            {
-              email: {
-                to: created.guestEmail,
-                subject: `Test drive confirmed — ${label} on ${formattedDate}`,
-                html,
-              },
-            },
-            "[email-stub] test-drive confirmation rendered (not sent)",
-          );
+          if (created.guestEmail) {
+            // Sends via SMTP when configured; otherwise logs the payload.
+            await sendMail(server.log, {
+              to: created.guestEmail,
+              subject: `Test drive booked — ${label} on ${formattedDate}`,
+              html,
+            });
+          }
+          const staffTo = adminNotificationRecipient();
+          if (staffTo) {
+            await sendMail(server.log, {
+              to: staffTo,
+              subject: `New test drive — ${label}, ${formattedDate} ${formattedTime}`,
+              html: `<p><strong>${escapeHtml(created.guestName ?? "Guest")}</strong> booked a test drive.</p>
+<p>Vehicle: ${escapeHtml(label)}<br/>When: ${escapeHtml(formattedDate)}, ${escapeHtml(formattedTime)}<br/>
+Phone: ${escapeHtml(created.guestPhone ?? "—")}<br/>Email: ${escapeHtml(created.guestEmail ?? "—")}<br/>
+Reference: ${testDriveReferenceFromId(created.id)}</p>`,
+              ...(created.guestEmail ? { replyTo: created.guestEmail } : {}),
+            });
+          }
         } catch (renderErr) {
           server.log.warn({ err: renderErr }, "email render failed (non-fatal)");
         }
 
         return reply.code(201).send({
           id: created.id,
-          reference: referenceFromId(created.id),
+          reference: testDriveReferenceFromId(created.id),
           scheduledAt: created.scheduledAt.toISOString(),
           status: created.status,
         });
@@ -264,7 +271,7 @@ export const testDrivesPublicRoutes: FastifyPluginAsyncZod = async (server) => {
       });
 
       const start = td.scheduledAt;
-      const reference = referenceFromId(td.id);
+      const reference = testDriveReferenceFromId(td.id);
 
       const { error, value } = createEvent({
         start: [
@@ -279,7 +286,7 @@ export const testDrivesPublicRoutes: FastifyPluginAsyncZod = async (server) => {
         title: `Test drive — ${label}`,
         description: `Booking reference: ${reference}\n\nWe'll have the vehicle ready when you arrive. Bring your NRIC or passport, your driving license, and comfortable footwear.\n\nNeed to reschedule? ${WHATSAPP_URL}`,
         location: SHOWROOM_ADDRESS,
-        organizer: { name: "Dealership", email: "hello@dealership.my" },
+        organizer: { name: SITE.name, email: SITE.email },
         alarms: [
           {
             action: "display",

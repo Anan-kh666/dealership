@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { prisma, StockStatus } from "@dealership/db";
+import { getSessionUser } from "@/server/session";
 import { Container } from "@dealership/ui/components/container";
 import { Section } from "@dealership/ui/components/section";
 import {
@@ -53,115 +54,145 @@ async function buildConfigNotes(
 
   if (!trimId) return null;
 
-  const trim = await prisma.trim.findUnique({
-    where: { id: trimId },
-    include: { model: true },
-  });
-  if (!trim) return null;
-  // If a model hint is supplied, ensure the trim belongs to it — silently
-  // discard mismatches so a stale link can't pre-fill a different car's spec.
-  if (modelSlug && trim.model.slug !== modelSlug) return null;
-  if (modelIdHint && trim.model.id !== modelIdHint) return null;
+  try {
+    const trim = await prisma.trim.findUnique({
+      where: { id: trimId },
+      include: { model: true },
+    });
+    if (!trim) return null;
+    // If a model hint is supplied, ensure the trim belongs to it — silently
+    // discard mismatches so a stale link can't pre-fill a different car's spec.
+    if (modelSlug && trim.model.slug !== modelSlug) return null;
+    if (modelIdHint && trim.model.id !== modelIdHint) return null;
 
-  const colorIds = [exteriorId, interiorId].filter(
-    (id): id is string => typeof id === "string" && id.length > 0,
-  );
-  const [colors, options] = await Promise.all([
-    colorIds.length > 0
-      ? prisma.color.findMany({ where: { id: { in: colorIds } } })
-      : Promise.resolve([]),
-    optionIds.length > 0
-      ? prisma.option.findMany({ where: { id: { in: optionIds } } })
-      : Promise.resolve([]),
-  ]);
-  const colorMap = new Map(colors.map((c) => [c.id, c]));
-  const exterior = exteriorId ? colorMap.get(exteriorId) : undefined;
-  const interior = interiorId ? colorMap.get(interiorId) : undefined;
+    const colorIds = [exteriorId, interiorId].filter(
+      (id): id is string => typeof id === "string" && id.length > 0,
+    );
+    const [colors, options] = await Promise.all([
+      colorIds.length > 0
+        ? prisma.color.findMany({ where: { id: { in: colorIds } } })
+        : Promise.resolve([]),
+      optionIds.length > 0
+        ? prisma.option.findMany({ where: { id: { in: optionIds } } })
+        : Promise.resolve([]),
+    ]);
+    const colorMap = new Map(colors.map((c) => [c.id, c]));
+    const exterior = exteriorId ? colorMap.get(exteriorId) : undefined;
+    const interior = interiorId ? colorMap.get(interiorId) : undefined;
 
-  const lines: string[] = [`Spec: ${trim.model.name} ${trim.name}`];
-  if (exterior) lines.push(`Exterior: ${exterior.name}`);
-  if (interior) lines.push(`Interior: ${interior.name}`);
-  if (options.length > 0) {
-    lines.push(`Options: ${options.map((o) => o.name).join(", ")}`);
+    const lines: string[] = [`Spec: ${trim.model.name} ${trim.name}`];
+    if (exterior) lines.push(`Exterior: ${exterior.name}`);
+    if (interior) lines.push(`Interior: ${interior.name}`);
+    if (options.length > 0) {
+      lines.push(`Options: ${options.map((o) => o.name).join(", ")}`);
+    }
+    return lines.join(" · ");
+  } catch {
+    return null;
   }
-  return lines.join(" · ");
 }
 
 async function loadPrefill(sp: Awaited<SearchParams>): Promise<PrefilledVehicle | null> {
-  if (sp.stockUnitId) {
-    const unit = await prisma.stockUnit.findUnique({
-      where: { id: sp.stockUnitId },
-      include: { trim: { include: { model: true } } },
-    });
-    if (unit) {
-      return {
-        kind: "stockUnit",
-        stockUnitId: unit.id,
-        modelId: unit.trim.model.id,
-        label: unit.trim.model.name,
-        trimLabel: unit.trim.name,
-      };
+  try {
+    if (sp.stockUnitId) {
+      const unit = await prisma.stockUnit.findUnique({
+        where: { id: sp.stockUnitId },
+        include: { trim: { include: { model: true } } },
+      });
+      if (unit) {
+        return {
+          kind: "stockUnit",
+          stockUnitId: unit.id,
+          modelId: unit.trim.model.id,
+          label: unit.trim.model.name,
+          trimLabel: unit.trim.name,
+        };
+      }
     }
-  }
-  if (sp.modelId) {
-    const model = await prisma.model.findUnique({ where: { id: sp.modelId } });
-    if (model) {
-      return { kind: "model", modelId: model.id, label: model.name };
+    if (sp.modelId) {
+      const model = await prisma.model.findUnique({ where: { id: sp.modelId } });
+      if (model) {
+        return { kind: "model", modelId: model.id, label: model.name };
+      }
     }
-  }
-  if (sp.slug) {
-    const model = await prisma.model.findUnique({ where: { slug: sp.slug } });
-    if (model) {
-      return { kind: "model", modelId: model.id, label: model.name };
+    if (sp.slug) {
+      const model = await prisma.model.findUnique({ where: { slug: sp.slug } });
+      if (model) {
+        return { kind: "model", modelId: model.id, label: model.name };
+      }
     }
+  } catch {
+    // No DB — skip prefill.
   }
   return null;
 }
 
 async function loadModels(): Promise<ModelOption[]> {
-  const models = await prisma.model.findMany({
-    where: { isActive: true },
-    orderBy: [{ isFeatured: "desc" }, { displayOrder: "asc" }],
-    select: {
-      id: true,
-      slug: true,
-      name: true,
-      bodyType: true,
-      heroImage: true,
-      startingPrice: true,
-      isFeatured: true,
-    },
-  });
-  return models.map((m) => ({
-    id: m.id,
-    slug: m.slug,
-    name: m.name,
-    bodyType: m.bodyType,
-    heroImage: m.heroImage,
-    startingPrice: m.startingPrice.toString(),
-    isFeatured: m.isFeatured,
-  }));
+  try {
+    const models = await prisma.model.findMany({
+      where: { isActive: true },
+      orderBy: [{ isFeatured: "desc" }, { displayOrder: "asc" }],
+      select: {
+        id: true,
+        slug: true,
+        name: true,
+        bodyType: true,
+        heroImage: true,
+        startingPrice: true,
+        isFeatured: true,
+      },
+    });
+    return models.map((m) => ({
+      id: m.id,
+      slug: m.slug,
+      name: m.name,
+      bodyType: m.bodyType,
+      heroImage: m.heroImage,
+      startingPrice: m.startingPrice.toString(),
+      isFeatured: m.isFeatured,
+    }));
+  } catch {
+    return [];
+  }
 }
 
 async function loadStockUnits(): Promise<StockOption[]> {
-  const units = await prisma.stockUnit.findMany({
-    where: { status: StockStatus.AVAILABLE },
-    orderBy: { createdAt: "desc" },
-    take: 12,
-    include: {
-      trim: { include: { model: { select: { id: true, name: true, slug: true } } } },
-      images: { orderBy: { order: "asc" }, take: 1 },
-    },
-  });
-  return units.map((u) => ({
-    id: u.id,
-    slug: u.slug,
-    modelId: u.trim.model.id,
-    modelName: u.trim.model.name,
-    trimName: u.trim.name,
-    totalPrice: u.totalPrice.toString(),
-    image: u.images[0]?.url ?? null,
-  }));
+  try {
+    const units = await prisma.stockUnit.findMany({
+      where: { status: StockStatus.AVAILABLE },
+      orderBy: { createdAt: "desc" },
+      take: 12,
+      include: {
+        trim: { include: { model: { select: { id: true, name: true, slug: true } } } },
+        images: { orderBy: { order: "asc" }, take: 1 },
+      },
+    });
+    return units.map((u) => ({
+      id: u.id,
+      slug: u.slug,
+      modelId: u.trim.model.id,
+      modelName: u.trim.model.name,
+      trimName: u.trim.name,
+      totalPrice: u.totalPrice.toString(),
+      image: u.images[0]?.url ?? null,
+    }));
+  } catch {
+    return [];
+  }
+}
+
+async function loadAccount(): Promise<{ name: string; email: string; phone: string } | null> {
+  try {
+    const user = await getSessionUser();
+    if (!user) return null;
+    const row = await prisma.user.findUnique({
+      where: { id: user.id },
+      select: { name: true, email: true, phone: true },
+    });
+    return row ? { name: row.name, email: row.email, phone: row.phone ?? "" } : null;
+  } catch {
+    return null;
+  }
 }
 
 export default async function TestDrivePage({
@@ -170,10 +201,11 @@ export default async function TestDrivePage({
   searchParams: SearchParams;
 }): Promise<React.ReactElement> {
   const sp = await searchParams;
-  const [prefill, models, stock] = await Promise.all([
+  const [prefill, models, stock, account] = await Promise.all([
     loadPrefill(sp),
     loadModels(),
     loadStockUnits(),
+    loadAccount(),
   ]);
   const configNotes = await buildConfigNotes(
     sp.config,
@@ -212,6 +244,7 @@ export default async function TestDrivePage({
             models={models}
             stockUnits={stock}
             configNotes={configNotes}
+            account={account}
           />
         </Container>
       </Section>

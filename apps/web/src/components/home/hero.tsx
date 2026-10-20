@@ -5,7 +5,7 @@ import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";
 import { ChevronDown } from "lucide-react";
 import { BrandButton } from "@dealership/ui/components/brand-button";
-import { HERO_IMAGE } from "@/data/placeholders";
+import { HERO_IMAGE } from "@/data/media";
 
 const STAGGER = {
   show: { transition: { staggerChildren: 0.08, delayChildren: 0.1 } },
@@ -63,7 +63,7 @@ export function Hero(): React.ReactElement {
           </motion.p>
           <motion.div variants={ITEM} className="flex flex-col gap-2 pt-4 sm:flex-row sm:gap-4">
             <BrandButton asChild variant="primary" size="lg">
-              <Link href="/models">Build Yours</Link>
+              <Link href="/build">Build Yours</Link>
             </BrandButton>
             <BrandButton asChild variant="hero-only" size="lg">
               <Link href="/stock">Available Now</Link>

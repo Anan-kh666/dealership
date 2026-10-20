@@ -5,7 +5,8 @@ import {
   TradeInStatus,
   type Prisma,
 } from "@dealership/db";
-import { tradeInFullSubmissionSchema } from "@dealership/types";
+import { SITE, tradeInFullSubmissionSchema } from "@dealership/types";
+import { adminNotificationRecipient, escapeHtml, sendMail } from "../../lib/mailer.js";
 import { createRateLimiter } from "../../lib/rate-limit.js";
 import {
   tradeInIdSuffixFromReference,
@@ -78,19 +79,42 @@ export const tradeInsPublicRoutes: FastifyPluginAsyncZod = async (server) => {
       const created = await prisma.tradeIn.create({ data });
       const reference = tradeInReferenceFromId(created.id);
 
-      // Stub email — Resend wiring deferred. Logged so the dev/staff
-      // operator can see what would be sent.
       request.log.info(
         {
-          to: "staff@dealership.local",
           reference,
           vehicle: `${body.year} ${body.make} ${body.model}`,
-          contact: body.contactEmail,
           photoCount: body.photos.length,
           photosSkipped: body.photosSkipped,
         },
-        "trade-in submitted (email stub — Resend not wired)",
+        "trade-in submitted",
       );
+
+      // Notifications never fail the submission; the mailer logs instead of
+      // sending when SMTP isn't configured.
+      const vehicle = `${body.year} ${body.make} ${body.model}`;
+      try {
+        await sendMail(request.log, {
+          to: body.contactEmail,
+          subject: `We received your trade-in — ${reference}`,
+          html: `<p>Hi ${escapeHtml(body.contactName)},</p>
+<p>Thanks for submitting your ${escapeHtml(vehicle)} for valuation. Our team will review the details and send you a quote within one business day.</p>
+<p>Your reference is <strong>${reference}</strong>. You can check its status any time on our website, or reply to this email with questions.</p>
+<p>— The ${escapeHtml(SITE.name)} team<br/>${escapeHtml(SITE.phone.display)}</p>`,
+        });
+        const staffTo = adminNotificationRecipient();
+        if (staffTo) {
+          await sendMail(request.log, {
+            to: staffTo,
+            subject: `New trade-in — ${vehicle} (${reference})`,
+            html: `<p>${escapeHtml(body.contactName)} submitted a ${escapeHtml(vehicle)}, ${body.mileage.toLocaleString("en-MY")} km, condition ${escapeHtml(body.condition)}.</p>
+<p>Phone: ${escapeHtml(body.contactPhone)} (prefers ${body.preferredContactMethod.toLowerCase()}, ${body.bestTimeToCall.toLowerCase()})<br/>
+Email: ${escapeHtml(body.contactEmail)}<br/>Photos: ${body.photosSkipped ? "skipped — chase directly" : String(body.photos.length)}</p>`,
+            replyTo: body.contactEmail,
+          });
+        }
+      } catch (err) {
+        request.log.warn({ err, reference }, "trade-in email failed (non-fatal)");
+      }
 
       return { id: created.id, reference };
     },

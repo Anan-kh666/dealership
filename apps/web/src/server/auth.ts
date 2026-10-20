@@ -1,28 +1,42 @@
-import NextAuth, { type NextAuthConfig } from "next-auth";
+import "server-only";
+import NextAuth from "next-auth";
+import Credentials from "next-auth/providers/credentials";
+import { compare } from "bcryptjs";
+import { prisma } from "@dealership/db";
+import { signInSchema } from "@dealership/types";
+import { authConfig } from "./auth.config";
 
 /**
- * Auth.js v5 scaffold. Routes are intentionally not wired up yet — login,
- * register, and session callbacks are added by the auth-flows agent.
+ * Auth.js v5 — email + password (Credentials) with JWT sessions.
  *
- * Add providers to `providers` and persistence via the Prisma adapter when
- * customer auth is built out.
+ * Passwords are bcrypt-hashed in `User.passwordHash`. Accounts are created
+ * through `/register` (or the opt-in checkbox in the test-drive flow) and
+ * staff accounts are provisioned by the seed or by an admin.
  */
-export const authConfig: NextAuthConfig = {
-  providers: [],
-  pages: {
-    signIn: "/sign-in",
-  },
-  session: {
-    strategy: "jwt",
-  },
-  callbacks: {
-    authorized({ auth, request }) {
-      const path = request.nextUrl.pathname;
-      const isProtected = path.startsWith("/account") || path.startsWith("/admin");
-      if (!isProtected) return true;
-      return Boolean(auth?.user);
-    },
-  },
-};
+export const { handlers, auth, signIn, signOut } = NextAuth({
+  ...authConfig,
+  providers: [
+    Credentials({
+      credentials: {
+        email: { label: "Email", type: "email" },
+        password: { label: "Password", type: "password" },
+      },
+      async authorize(raw) {
+        const parsed = signInSchema.safeParse(raw);
+        if (!parsed.success) return null;
+        const { email, password } = parsed.data;
 
-export const { handlers, auth, signIn, signOut } = NextAuth(authConfig);
+        const user = await prisma.user.findUnique({ where: { email } });
+        // Always run a compare so response timing doesn't reveal whether
+        // the email exists.
+        const hash =
+          user?.passwordHash ??
+          "$2b$12$jXjTq6ykGiFRMRE2ALp0CuCuJzL57v/G47QXLkc1eRNrMvOBV1Uzy";
+        const ok = await compare(password, hash);
+        if (!user || !user.passwordHash || !ok) return null;
+
+        return { id: user.id, email: user.email, name: user.name, role: user.role };
+      },
+    }),
+  ],
+});

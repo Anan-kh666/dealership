@@ -5,6 +5,7 @@ import dynamic from "next/dynamic";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import type { CarAsset } from "@/lib/car-assets";
 import { useConfiguratorStore } from "@/stores/configurator-store";
 import { parseConfig, buildQueryString } from "./lib/url-sync";
 import { computeTotal, formatRM } from "./lib/pricing";
@@ -60,6 +61,8 @@ export interface ConfiguratorModel {
   heroImage: string;
   currency: string;
   trims: ConfiguratorTrim[];
+  /** Real 3D model for this car, or null to use the stylised placeholder. */
+  asset: CarAsset | null;
 }
 
 const PreviewCanvas = dynamic(() => import("./components/preview-canvas"), {
@@ -116,6 +119,11 @@ export function ConfiguratorClient({
       options: params.options ?? [],
     });
     hydrate(initial);
+    // Deep links from a trim card ("Build this") already carry the trim, so
+    // open on the next decision instead of asking again.
+    if (params.trim && params.trim === initial.trimId && model.trims.length > 1) {
+      setStep(2);
+    }
     // We intentionally only run this once on mount — URL is the source of
     // truth on initial load; subsequent updates flow store → URL.
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -234,8 +242,8 @@ export function ConfiguratorClient({
   // ---- Render -----------------------------------------------------------
   const currentStep = steps[step - 1];
   const isSummary = currentStep?.kind === "summary";
-  const exteriorHex =
-    trim.exteriorColors.find((c) => c.id === exteriorColorId)?.hexCode ?? "#1A1A1A";
+  const exteriorColor = trim.exteriorColors.find((c) => c.id === exteriorColorId);
+  const exteriorHex = exteriorColor?.hexCode ?? "#1A1A1A";
   const interiorHex =
     trim.interiorColors.find((c) => c.id === interiorColorId)?.hexCode ?? "#1A1A1A";
 
@@ -259,7 +267,10 @@ export function ConfiguratorClient({
           <div className="relative h-full w-full lg:sticky lg:top-24 lg:h-[calc(100vh-7rem)] lg:rounded-[var(--radius-lg)] lg:overflow-hidden">
             {hasHydrated ? (
               <PreviewCanvas
+                asset={model.asset}
+                step={currentStep?.kind ?? "trim"}
                 bodyHex={exteriorHex}
+                bodyMetallic={exteriorColor?.isMetallic ?? true}
                 interiorHex={interiorHex}
                 wheelStyle={trim.wheelStyle}
               />

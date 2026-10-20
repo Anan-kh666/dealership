@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { Metadata } from "next";
+import { prisma } from "@dealership/db";
 import { Container } from "@dealership/ui/components/container";
 import { Section } from "@dealership/ui/components/section";
 import { BrandButton } from "@dealership/ui/components/brand-button";
@@ -29,7 +30,41 @@ const STEPS: { title: string; body: string }[] = [
   },
 ];
 
-export default function FinancingPage(): React.ReactElement {
+async function loadVehicle(
+  stockUnitId: string | undefined,
+): Promise<{ id: string; label: string; slug: string; price: number } | null> {
+  if (!stockUnitId) return null;
+  try {
+    const unit = await prisma.stockUnit.findUnique({
+      where: { id: stockUnitId },
+      select: {
+        id: true,
+        slug: true,
+        totalPrice: true,
+        status: true,
+        trim: { select: { name: true, model: { select: { name: true, year: true } } } },
+      },
+    });
+    if (!unit || unit.status === "SOLD") return null;
+    return {
+      id: unit.id,
+      slug: unit.slug,
+      label: `${unit.trim.model.year} ${unit.trim.model.name} ${unit.trim.name}`,
+      price: Number(unit.totalPrice),
+    };
+  } catch {
+    return null;
+  }
+}
+
+export default async function FinancingPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ stockUnitId?: string }>;
+}): Promise<React.ReactElement> {
+  const { stockUnitId } = await searchParams;
+  const vehicle = await loadVehicle(stockUnitId);
+
   return (
     <>
       <Section spacing="loose">
@@ -43,7 +78,31 @@ export default function FinancingPage(): React.ReactElement {
       <Section variant="warm" spacing="default">
         <Container>
           <div id="calculator" className="scroll-mt-24">
-            <FinanceWidget editablePrice variant="standalone" />
+            {vehicle ? (
+              <div className="mb-6 flex flex-col gap-1 md:flex-row md:items-baseline md:justify-between">
+                <p className="text-sm text-[var(--color-neutral-700)]">
+                  Calculating for{" "}
+                  <Link
+                    href={`/stock/${vehicle.slug}`}
+                    className="font-medium text-[var(--color-graphite)] underline underline-offset-4"
+                  >
+                    {vehicle.label}
+                  </Link>
+                </p>
+                <Link
+                  href="/financing#calculator"
+                  className="text-sm text-[var(--color-neutral-600)] underline-offset-4 hover:underline"
+                >
+                  Use a different price
+                </Link>
+              </div>
+            ) : null}
+            <FinanceWidget
+              key={vehicle?.id ?? "any"}
+              editablePrice={!vehicle}
+              {...(vehicle ? { vehiclePrice: vehicle.price, vehicleId: vehicle.id } : {})}
+              variant="standalone"
+            />
           </div>
         </Container>
       </Section>

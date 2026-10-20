@@ -1,16 +1,38 @@
 import Link from "next/link";
+import { BrandButton } from "@dealership/ui/components/brand-button";
+import { Container } from "@dealership/ui/components/container";
+import { SiteChrome } from "@/components/site-chrome";
 
 export default function NotFound(): React.ReactElement {
   return (
-    <section className="mx-auto flex min-h-[50vh] max-w-2xl flex-col items-start justify-center gap-4 px-6">
-      <p className="text-sm uppercase tracking-[0.2em] text-muted-foreground">404</p>
-      <h1 className="font-[family-name:var(--font-fraunces)] text-4xl">Page not found</h1>
-      <p className="text-muted-foreground">
-        The page you&apos;re looking for has moved or doesn&apos;t exist.
-      </p>
-      <Link href="/" className="text-sm underline underline-offset-4">
-        Back to home
-      </Link>
-    </section>
+    <SiteChrome>
+      <section className="bg-[var(--color-surface-warm)] pb-24 pt-40 md:pb-32 md:pt-48">
+        <Container>
+          <div className="flex max-w-2xl flex-col items-start gap-5">
+            <p className="text-xs uppercase tracking-[0.24em] text-[var(--color-neutral-500)]">
+              Error 404
+            </p>
+            <h1
+              className="font-[family-name:var(--font-display)] tracking-[-0.02em]"
+              style={{ fontSize: "clamp(40px, 7vw, 72px)", lineHeight: 1.05 }}
+            >
+              This road doesn&rsquo;t go anywhere.
+            </h1>
+            <p className="max-w-lg text-base text-[var(--color-neutral-600)] md:text-lg">
+              The page you were looking for has moved, sold, or never existed. Try one of these
+              instead.
+            </p>
+            <div className="flex flex-col gap-3 pt-4 sm:flex-row">
+              <BrandButton asChild variant="primary" size="lg">
+                <Link href="/models">Explore the lineup</Link>
+              </BrandButton>
+              <BrandButton asChild variant="ghost-dark" size="lg">
+                <Link href="/stock">See cars in stock</Link>
+              </BrandButton>
+            </div>
+          </div>
+        </Container>
+      </section>
+    </SiteChrome>
   );
 }

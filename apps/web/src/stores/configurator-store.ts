@@ -59,12 +59,16 @@ export const useConfiguratorStore = create<ConfiguratorState>((set) => ({
         : [...s.optionIds, id],
     })),
   setStep: (step) => set({ step }),
+  // The store is a module-level singleton, so it outlives a navigation from
+  // one model's configurator to another's. Hydration always restarts the
+  // wizard at step 1 to avoid landing mid-flow on a different car.
   hydrate: ({ trimId, exteriorColorId, interiorColorId, optionIds }) =>
     set({
       trimId,
       exteriorColorId,
       interiorColorId,
       optionIds,
+      step: 1,
       hasHydrated: true,
     }),
   setHydrated: () => set({ hasHydrated: true }),

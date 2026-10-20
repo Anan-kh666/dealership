@@ -1,6 +1,10 @@
 {
   "$schema": "https://turbo.build/schema.json",
-  "globalDependencies": [".env", ".env.local", ".env.example"],
+  "globalDependencies": [
+    ".env",
+    ".env.local",
+    ".env.example"
+  ],
   "globalEnv": [
     "NODE_ENV",
     "DATABASE_URL",
@@ -13,25 +17,48 @@
     "R2_BUCKET",
     "R2_ENDPOINT",
     "NEXT_PUBLIC_API_URL",
-    "PORT"
+    "PORT",
+    "NEXT_PUBLIC_SITE_URL",
+    "SMTP_HOST",
+    "SMTP_PORT",
+    "SMTP_USER",
+    "SMTP_PASS",
+    "SMTP_SECURE",
+    "MAIL_FROM",
+    "ADMIN_NOTIFY_EMAIL",
+    "R2_PUBLIC_BASE_URL",
+    "LOG_LEVEL"
   ],
   "tasks": {
     "build": {
-      "dependsOn": ["^build"],
-      "outputs": [".next/**", "!.next/cache/**", "dist/**", "build/**"]
+      "dependsOn": [
+        "^build"
+      ],
+      "outputs": [
+        ".next/**",
+        "!.next/cache/**",
+        "dist/**",
+        "build/**"
+      ]
     },
     "dev": {
       "cache": false,
       "persistent": true
     },
     "lint": {
-      "dependsOn": ["^build"]
+      "dependsOn": [
+        "^build"
+      ]
     },
     "typecheck": {
-      "dependsOn": ["^build"]
+      "dependsOn": [
+        "^build"
+      ]
     },
     "test": {
-      "dependsOn": ["^build"]
+      "dependsOn": [
+        "^build"
+      ]
     },
     "clean": {
       "cache": false

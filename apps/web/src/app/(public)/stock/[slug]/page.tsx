@@ -42,25 +42,29 @@ type FullStockUnit = StockUnit & {
 };
 
 async function getUnit(slug: string): Promise<FullStockUnit | null> {
-  const unit = await prisma.stockUnit.findUnique({
-    where: { slug },
-    include: {
-      trim: {
-        include: {
-          model: true,
-          options: { include: { option: true } },
+  try {
+    const unit = await prisma.stockUnit.findUnique({
+      where: { slug },
+      include: {
+        trim: {
+          include: {
+            model: true,
+            options: { include: { option: true } },
+          },
         },
+        images: { orderBy: { order: "asc" } },
       },
-      images: { orderBy: { order: "asc" } },
-    },
-  });
-  if (!unit) return null;
-  const [exterior, interior] = await Promise.all([
-    prisma.color.findUnique({ where: { id: unit.exteriorColorId } }),
-    prisma.color.findUnique({ where: { id: unit.interiorColorId } }),
-  ]);
-  if (!exterior || !interior) return null;
-  return { ...unit, exteriorColor: exterior, interiorColor: interior };
+    });
+    if (!unit) return null;
+    const [exterior, interior] = await Promise.all([
+      prisma.color.findUnique({ where: { id: unit.exteriorColorId } }),
+      prisma.color.findUnique({ where: { id: unit.interiorColorId } }),
+    ]);
+    if (!exterior || !interior) return null;
+    return { ...unit, exteriorColor: exterior, interiorColor: interior };
+  } catch {
+    return null;
+  }
 }
 
 export async function generateMetadata({
@@ -69,25 +73,29 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const unit = await prisma.stockUnit.findUnique({
-    where: { slug },
-    include: { trim: { include: { model: true } }, images: { orderBy: { order: "asc" }, take: 1 } },
-  });
-  if (!unit) return { title: "Stock unit not found" };
-  const exterior = await prisma.color.findUnique({ where: { id: unit.exteriorColorId } });
-  const colorName = exterior?.name ?? "Available";
-  const title = `${unit.trim.model.name} ${unit.trim.name} (${colorName}) — Available Now`;
-  const price = formatPrice(unit.totalPrice.toString());
-  const description = `${unit.trim.model.name} ${unit.trim.name} in ${colorName} at ${price}. Ready for collection in Selangor.`;
-  return {
-    title,
-    description: description.slice(0, 155),
-    openGraph: {
+  try {
+    const unit = await prisma.stockUnit.findUnique({
+      where: { slug },
+      include: { trim: { include: { model: true } }, images: { orderBy: { order: "asc" }, take: 1 } },
+    });
+    if (!unit) return { title: "Stock unit not found" };
+    const exterior = await prisma.color.findUnique({ where: { id: unit.exteriorColorId } });
+    const colorName = exterior?.name ?? "Available";
+    const title = `${unit.trim.model.name} ${unit.trim.name} (${colorName}) — Available Now`;
+    const price = formatPrice(unit.totalPrice.toString());
+    const description = `${unit.trim.model.name} ${unit.trim.name} in ${colorName} at ${price}. Ready for collection in Selangor.`;
+    return {
       title,
-      description,
-      images: unit.images[0] ? [{ url: unit.images[0].url }] : [],
-    },
-  };
+      description: description.slice(0, 155),
+      openGraph: {
+        title,
+        description,
+        images: unit.images[0] ? [{ url: unit.images[0].url }] : [],
+      },
+    };
+  } catch {
+    return { title: "Stock unit not found" };
+  }
 }
 
 function shortDrivetrain(d: Drivetrain): string {
@@ -472,7 +480,7 @@ function JsonLd({ unit }: { unit: FullStockUnit }): React.ReactElement {
   return (
     <script
       type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }}
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(data).replace(/</g, "\\u003c") }}
     />
   );
 }

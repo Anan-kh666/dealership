@@ -42,10 +42,15 @@ export default async function ModelsPage({
     where.trims = { some: { fuelType: sp.fuelType } };
   }
 
-  const models = await prisma.model.findMany({
-    where,
-    orderBy: [{ displayOrder: "asc" }, { startingPrice: "asc" }],
-  });
+  let models: Awaited<ReturnType<typeof prisma.model.findMany>> = [];
+  try {
+    models = await prisma.model.findMany({
+      where,
+      orderBy: [{ displayOrder: "asc" }, { startingPrice: "asc" }],
+    });
+  } catch {
+    // Renders empty when DB is unavailable.
+  }
 
   return (
     <>

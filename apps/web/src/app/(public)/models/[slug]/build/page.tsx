@@ -10,6 +10,7 @@ import {
   type Trim,
   type TrimColor,
 } from "@dealership/db";
+import { resolveCarAsset } from "@/server/car-assets";
 import { ConfiguratorClient, type ConfiguratorModel } from "./configurator-client";
 
 export const dynamic = "force-dynamic";
@@ -72,6 +73,7 @@ export default async function BuildPage({
     year: model.year,
     heroImage: model.heroImage,
     currency: model.currency,
+    asset: resolveCarAsset(model.slug),
     trims: model.trims.map((t, i) => ({
       id: t.id,
       name: t.name,

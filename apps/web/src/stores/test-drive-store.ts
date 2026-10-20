@@ -90,7 +90,8 @@ export const useTestDriveStore = create<TestDriveState>()(
         step: s.step,
         vehicle: s.vehicle,
         scheduledAtIso: s.scheduledAtIso,
-        details: s.details,
+        // Never write the optional account password to sessionStorage.
+        details: { ...s.details, password: "" },
         consent: s.consent,
       }),
       onRehydrateStorage: () => (state) => {

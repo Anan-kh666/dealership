@@ -9,11 +9,11 @@
     ".": "./src/index.ts"
   },
   "scripts": {
-    "db:generate": "prisma generate",
-    "db:migrate:dev": "prisma migrate dev",
-    "db:migrate:deploy": "prisma migrate deploy",
-    "db:studio": "prisma studio",
-    "db:seed": "tsx prisma/seed.ts",
+    "db:generate": "dotenv -e ../../.env -- prisma generate",
+    "db:migrate:dev": "dotenv -e ../../.env -- prisma migrate dev",
+    "db:migrate:deploy": "dotenv -e ../../.env -- prisma migrate deploy",
+    "db:studio": "dotenv -e ../../.env -- prisma studio",
+    "db:seed": "dotenv -e ../../.env -- tsx prisma/seed.ts",
     "build": "tsc -p tsconfig.json --noEmit",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "lint": "eslint src --max-warnings 0"
@@ -27,6 +27,8 @@
   "devDependencies": {
     "@dealership/config": "workspace:*",
     "@types/node": "^22.9.0",
+    "bcryptjs": "^3.0.3",
+    "dotenv-cli": "^8.0.0",
     "prisma": "^5.22.0",
     "tsx": "^4.19.2",
     "typescript": "^5.6.3"

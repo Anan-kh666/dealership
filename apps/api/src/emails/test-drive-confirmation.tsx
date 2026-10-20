@@ -10,6 +10,7 @@ import {
   Section,
   Text,
 } from "@react-email/components";
+import { SITE } from "@dealership/types";
 import * as React from "react";
 
 export interface TestDriveConfirmationProps {
@@ -29,9 +30,9 @@ const DEFAULTS: TestDriveConfirmationProps = {
   formattedDate: "Saturday, 9 May 2026",
   formattedTime: "11:00 AM",
   reference: "TD-XXXXXX",
-  dealershipAddress: "Lot 12, Jalan Sultan Ismail, 50250 Petaling Jaya, Selangor",
-  dealershipPhone: "+60 3 7801 2345",
-  whatsappUrl: "https://wa.me/60378012345",
+  dealershipAddress: SITE.address.oneLine,
+  dealershipPhone: SITE.phone.display,
+  whatsappUrl: SITE.whatsappUrl,
 };
 
 export function TestDriveConfirmationEmail(

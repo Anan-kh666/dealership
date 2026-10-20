@@ -1,10 +1,11 @@
 "use client";
 
 import Link from "next/link";
+import { SITE } from "@dealership/types";
 import { BrandButton } from "@dealership/ui/components/brand-button";
 import { useTradeInStore } from "@/stores/tradeInStore";
 
-const WHATSAPP_URL = "https://wa.me/60378012345";
+const WHATSAPP_URL = SITE.whatsappUrl;
 
 export function Success({
   reference,
@@ -45,7 +46,9 @@ export function Success({
           </BrandButton>
         )}
         <BrandButton asChild size="lg" variant="ghost-dark">
-          <Link href="/account/trade-ins">Track this submission</Link>
+          <Link href={`/trade-in/status?reference=${encodeURIComponent(reference)}`}>
+              Track this submission
+            </Link>
         </BrandButton>
         <a
           href={WHATSAPP_URL}

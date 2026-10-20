@@ -44,20 +44,23 @@ type FullModel = Model & {
 };
 
 async function getModel(slug: string): Promise<FullModel | null> {
-  const m = await prisma.model.findUnique({
-    where: { slug },
-    include: {
-      trims: {
-        orderBy: [{ displayOrder: "asc" }, { price: "asc" }],
-        include: {
-          options: { include: { option: true } },
-          trimColors: { include: { color: true } },
+  try {
+    return await prisma.model.findUnique({
+      where: { slug },
+      include: {
+        trims: {
+          orderBy: [{ displayOrder: "asc" }, { price: "asc" }],
+          include: {
+            options: { include: { option: true } },
+            trimColors: { include: { color: true } },
+          },
         },
+        images: { orderBy: { order: "asc" } },
       },
-      images: { orderBy: { order: "asc" } },
-    },
-  });
-  return m;
+    });
+  } catch {
+    return null;
+  }
 }
 
 function formatBodyType(b: BodyType): string {
@@ -136,17 +139,20 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const model = await prisma.model.findUnique({
-    where: { slug },
-    select: {
-      name: true,
-      year: true,
-      description: true,
-      heroImage: true,
-      metaTitle: true,
-      metaDescription: true,
-    },
-  });
+  let model: { name: string; year: number; description: string; heroImage: string; metaTitle: string | null; metaDescription: string | null } | null = null;
+  try {
+    model = await prisma.model.findUnique({
+      where: { slug },
+      select: {
+        name: true,
+        year: true,
+        description: true,
+        heroImage: true,
+        metaTitle: true,
+        metaDescription: true,
+      },
+    });
+  } catch { /* no db */ }
   if (!model) return { title: "Model not found" };
   const title = model.metaTitle ?? `${model.year} ${model.name}`;
   const description = (model.metaDescription ?? model.description).slice(0, 155);
@@ -198,25 +204,28 @@ export default async function ModelDetailPage({
   // the starting point.
   const entryTrim = model.trims[0];
 
-  const similar = await prisma.model.findMany({
-    where: {
-      isActive: true,
-      slug: { not: model.slug },
-      bodyType: model.bodyType,
-    },
-    orderBy: { displayOrder: "asc" },
-    take: 3,
-  });
-  if (similar.length < 3) {
-    const fillCount = 3 - similar.length;
-    const have = new Set([model.slug, ...similar.map((s) => s.slug)]);
-    const filler = await prisma.model.findMany({
-      where: { isActive: true, slug: { notIn: Array.from(have) } },
-      orderBy: { startingPrice: "asc" },
-      take: fillCount,
+  let similar: Awaited<ReturnType<typeof prisma.model.findMany>> = [];
+  try {
+    similar = await prisma.model.findMany({
+      where: {
+        isActive: true,
+        slug: { not: model.slug },
+        bodyType: model.bodyType,
+      },
+      orderBy: { displayOrder: "asc" },
+      take: 3,
     });
-    similar.push(...filler);
-  }
+    if (similar.length < 3) {
+      const fillCount = 3 - similar.length;
+      const have = new Set([model.slug, ...similar.map((s) => s.slug)]);
+      const filler = await prisma.model.findMany({
+        where: { isActive: true, slug: { notIn: Array.from(have) } },
+        orderBy: { startingPrice: "asc" },
+        take: fillCount,
+      });
+      similar.push(...filler);
+    }
+  } catch { /* no db — show no similar models */ }
 
   const startingPrice = formatPrice(model.startingPrice.toString(), model.currency);
 
@@ -725,7 +734,7 @@ function JsonLd({ model }: { model: FullModel }): React.ReactElement {
   return (
     <script
       type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }}
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(data).replace(/</g, "\\u003c") }}
     />
   );
 }

@@ -69,37 +69,41 @@ async function getVisibleStockUnits(): Promise<{
   units: EnrichedUnit[];
   colorByName: Map<string, Color>;
 }> {
-  const [units, colors] = await Promise.all([
-    prisma.stockUnit.findMany({
-      where: { status: { in: [StockStatus.AVAILABLE, StockStatus.IN_TRANSIT] } },
-      include: {
-        trim: { include: { model: true } },
-        images: { orderBy: { order: "asc" }, take: 1 },
-      },
-    }),
-    prisma.color.findMany(),
-  ]);
+  try {
+    const [rawUnits, colors] = await Promise.all([
+      prisma.stockUnit.findMany({
+        where: { status: { in: [StockStatus.AVAILABLE, StockStatus.IN_TRANSIT] } },
+        include: {
+          trim: { include: { model: true } },
+          images: { orderBy: { order: "asc" }, take: 1 },
+        },
+      }),
+      prisma.color.findMany(),
+    ]);
 
-  const colorById = new Map(colors.map((c) => [c.id, c] as const));
-  const colorByName = new Map(colors.map((c) => [c.name, c] as const));
+    const colorById = new Map(colors.map((c) => [c.id, c] as const));
+    const colorByName = new Map(colors.map((c) => [c.name, c] as const));
 
-  const enriched: EnrichedUnit[] = units.map((u) => {
-    const exterior = colorById.get(u.exteriorColorId) ?? null;
-    return {
-      raw: { ...u, exteriorColor: exterior },
-      id: u.id,
-      modelSlug: u.trim.model.slug,
-      trimName: u.trim.name,
-      bodyType: u.trim.model.bodyType,
-      fuelType: u.trim.fuelType,
-      exteriorColorName: exterior?.name ?? "",
-      totalPrice: Number(u.totalPrice),
-      arrivalDateMs: u.arrivalDate?.getTime() ?? u.createdAt.getTime(),
-      daysOnLot: u.daysOnLot,
-    };
-  });
+    const enriched: EnrichedUnit[] = rawUnits.map((u) => {
+      const exterior = colorById.get(u.exteriorColorId) ?? null;
+      return {
+        raw: { ...u, exteriorColor: exterior },
+        id: u.id,
+        modelSlug: u.trim.model.slug,
+        trimName: u.trim.name,
+        bodyType: u.trim.model.bodyType,
+        fuelType: u.trim.fuelType,
+        exteriorColorName: exterior?.name ?? "",
+        totalPrice: Number(u.totalPrice),
+        arrivalDateMs: u.arrivalDate?.getTime() ?? u.createdAt.getTime(),
+        daysOnLot: u.daysOnLot,
+      };
+    });
 
-  return { units: enriched, colorByName };
+    return { units: enriched, colorByName };
+  } catch {
+    return { units: [], colorByName: new Map() };
+  }
 }
 
 function buildFacets(

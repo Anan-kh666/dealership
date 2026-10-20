@@ -10,6 +10,7 @@ import {
   Section,
   Text,
 } from "@react-email/components";
+import { SITE } from "@dealership/types";
 import * as React from "react";
 
 export interface FinancingApplicantEmailProps {
@@ -34,8 +35,8 @@ const DEFAULTS: FinancingApplicantEmailProps = {
   tenureYears: 9,
   interestRatePct: "2.5",
   downPayment: "RM 0",
-  dealershipPhone: "+60 3 7801 2345",
-  whatsappUrl: "https://wa.me/60378012345",
+  dealershipPhone: SITE.phone.display,
+  whatsappUrl: SITE.whatsappUrl,
 };
 
 export function FinancingApplicantEmail(

@@ -22,16 +22,20 @@ async function loadPreselected(
   vehicleId: string | undefined,
 ): Promise<PreselectedVehicle | null> {
   if (!vehicleId) return null;
-  const unit = await prisma.stockUnit.findUnique({
-    where: { id: vehicleId },
-    include: { trim: { include: { model: true } } },
-  });
-  if (!unit) return null;
-  return {
-    id: unit.id,
-    label: `${unit.trim.model.year} ${unit.trim.model.name} ${unit.trim.name}`,
-    price: Number(unit.totalPrice),
-  };
+  try {
+    const unit = await prisma.stockUnit.findUnique({
+      where: { id: vehicleId },
+      include: { trim: { include: { model: true } } },
+    });
+    if (!unit) return null;
+    return {
+      id: unit.id,
+      label: `${unit.trim.model.year} ${unit.trim.model.name} ${unit.trim.name}`,
+      price: Number(unit.totalPrice),
+    };
+  } catch {
+    return null;
+  }
 }
 
 export default async function FinancingApplyPage({

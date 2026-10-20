@@ -1,10 +1,11 @@
 "use client";
 
 import Link from "next/link";
+import { SITE } from "@dealership/types";
 import { BrandButton } from "@dealership/ui/components/brand-button";
 import { useFinancingStore } from "@/stores/financingStore";
 
-const WHATSAPP_URL = "https://wa.me/60378012345";
+const WHATSAPP_URL = SITE.whatsappUrl;
 
 export function FinancingSuccess({
   reference,

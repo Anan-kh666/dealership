@@ -2,14 +2,14 @@
 
 import * as React from "react";
 import Link from "next/link";
+import { SITE } from "@dealership/types";
 import { BrandButton } from "@dealership/ui/components/brand-button";
 import { formatKlDate, formatSlotLabel, KL_TZ } from "@/lib/test-drive/slots";
 import { toZonedTime } from "date-fns-tz";
 import type { SuccessPayload } from "../test-drive-flow";
 
-const SHOWROOM_ADDRESS =
-  "Lot 12, Jalan Sultan Ismail, 50250 Petaling Jaya, Selangor";
-const WHATSAPP_BASE = "https://wa.me/60378012345";
+const SHOWROOM_ADDRESS = SITE.address.oneLine;
+const WHATSAPP_BASE = SITE.whatsappUrl;
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
 
 export function SuccessState({
@@ -56,6 +56,32 @@ export function SuccessState({
           &mdash; we&rsquo;ve sent a copy to {payload.guestEmail}.
         </p>
       </div>
+
+      {payload.account === "created" ? (
+        <p className="rounded-[var(--radius-md)] border border-[var(--color-success)]/25 bg-[var(--color-success)]/5 px-4 py-3 text-sm text-[var(--color-neutral-700)]">
+          Your account is ready and you&rsquo;re signed in.{" "}
+          <Link href="/account/test-drives" className="font-medium underline underline-offset-4">
+            Manage this booking
+          </Link>
+          .
+        </p>
+      ) : payload.account === "exists" ? (
+        <p className="rounded-[var(--radius-md)] border border-[var(--color-neutral-200)] bg-white px-4 py-3 text-sm text-[var(--color-neutral-700)]">
+          You already have an account with {payload.guestEmail}.{" "}
+          <Link href="/sign-in?callbackUrl=%2Faccount%2Ftest-drives" className="font-medium underline underline-offset-4">
+            Sign in
+          </Link>{" "}
+          to see this booking.
+        </p>
+      ) : payload.account === "invalid" ? (
+        <p className="rounded-[var(--radius-md)] border border-[var(--color-neutral-200)] bg-white px-4 py-3 text-sm text-[var(--color-neutral-700)]">
+          Your booking is in, but we couldn&rsquo;t create your account.{" "}
+          <Link href="/register?callbackUrl=%2Faccount%2Ftest-drives" className="font-medium underline underline-offset-4">
+            Create it now
+          </Link>{" "}
+          — this booking will appear there automatically.
+        </p>
+      ) : null}
 
       <dl className="grid grid-cols-1 gap-4 rounded-[var(--radius-md)] border border-[var(--color-neutral-200)] bg-[var(--color-surface-warm)] p-5 text-sm md:grid-cols-2">
         <Detail label="Vehicle" value={payload.vehicleLabel} />

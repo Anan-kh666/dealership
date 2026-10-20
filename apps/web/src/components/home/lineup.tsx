@@ -23,10 +23,15 @@ function bodyTypeLabel(b: BodyType): string {
 }
 
 export async function Lineup(): Promise<React.ReactElement> {
-  const models = await prisma.model.findMany({
-    where: { isActive: true },
-    orderBy: [{ displayOrder: "asc" }, { startingPrice: "asc" }],
-  });
+  let models: Awaited<ReturnType<typeof prisma.model.findMany>> = [];
+  try {
+    models = await prisma.model.findMany({
+      where: { isActive: true },
+      orderBy: [{ displayOrder: "asc" }, { startingPrice: "asc" }],
+    });
+  } catch {
+    // Renders empty when DB is unavailable (e.g. no DATABASE_URL in dev).
+  }
 
   return (
     <Section spacing="default">

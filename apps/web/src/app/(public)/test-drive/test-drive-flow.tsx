@@ -47,6 +47,8 @@ export interface TestDriveFlowProps {
   stockUnits: StockOption[];
   /** Pre-built spec summary from the configurator's `&config=` param. */
   configNotes?: string | null;
+  /** Signed-in customer — used to prefill contact details. */
+  account?: { name: string; email: string; phone: string } | null;
 }
 
 export interface SuccessPayload {
@@ -56,6 +58,8 @@ export interface SuccessPayload {
   vehicleLabel: string;
   guestName: string;
   guestEmail: string;
+  /** Outcome of the optional "create an account" checkbox. */
+  account?: "created" | "exists" | "invalid";
 }
 
 export function TestDriveFlow({
@@ -63,6 +67,7 @@ export function TestDriveFlow({
   models,
   stockUnits,
   configNotes,
+  account,
 }: TestDriveFlowProps): React.ReactElement {
   const step = useTestDriveStore((s) => s.step);
   const vehicle = useTestDriveStore((s) => s.vehicle);
@@ -87,6 +92,20 @@ export function TestDriveFlow({
     }
     configAppliedRef.current = true;
   }, [hasHydrated, configNotes, detailsNotes, setDetails]);
+
+  // Prefill contact details for signed-in customers (only empty fields).
+  const accountAppliedRef = useRef(false);
+  useEffect(() => {
+    if (!hasHydrated || accountAppliedRef.current || !account) return;
+    accountAppliedRef.current = true;
+    const d = useTestDriveStore.getState().details;
+    setDetails({
+      guestName: d.guestName || account.name,
+      guestEmail: d.guestEmail || account.email,
+      guestPhone: d.guestPhone || account.phone,
+      createAccount: false,
+    });
+  }, [hasHydrated, account, setDetails]);
 
   const [success, setSuccess] = React.useState<SuccessPayload | null>(null);
   const headingRef = useRef<HTMLHeadingElement | null>(null);
@@ -150,7 +169,7 @@ export function TestDriveFlow({
         ) : step === 2 ? (
           <DateTimeStep headingRef={headingRef} />
         ) : step === 3 ? (
-          <DetailsStep headingRef={headingRef} />
+          <DetailsStep headingRef={headingRef} signedIn={Boolean(account)} />
         ) : (
           <ConfirmationStep
             headingRef={headingRef}

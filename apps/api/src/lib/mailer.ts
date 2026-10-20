@@ -93,3 +93,13 @@ export async function sendMail(
 export function adminNotificationRecipient(): string | null {
   return process.env.ADMIN_NOTIFY_EMAIL ?? null;
 }
+
+/** Minimal HTML escaping for user-supplied values in plain notification emails. */
+export function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}

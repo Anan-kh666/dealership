@@ -40,8 +40,10 @@ type FormValues = z.infer<typeof schema>;
 
 export function DetailsStep({
   headingRef,
+  signedIn = false,
 }: {
   headingRef: React.RefObject<HTMLHeadingElement | null>;
+  signedIn?: boolean;
 }): React.ReactElement {
   const details = useTestDriveStore((s) => s.details);
   const setDetails = useTestDriveStore((s) => s.setDetails);
@@ -141,6 +143,7 @@ export function DetailsStep({
         />
       </Field>
 
+      {signedIn ? null : (
       <div className="rounded-[var(--radius-md)] border border-[var(--color-neutral-200)] bg-[var(--color-surface-warm)] p-4">
         <label className="flex items-start gap-3 text-sm text-[var(--color-neutral-700)]">
           <input
@@ -153,8 +156,8 @@ export function DetailsStep({
               Create an account?
             </span>
             <span className="text-[var(--color-neutral-600)]">
-              We&rsquo;ll save your saved configurations and bookings. You can do
-              this later.
+              Track and manage this booking — and future ones — from your
+              account. You can always do this later.
             </span>
           </span>
         </label>
@@ -170,6 +173,7 @@ export function DetailsStep({
           </div>
         ) : null}
       </div>
+      )}
 
       <div className="flex items-center justify-between gap-3 border-t border-[var(--color-neutral-200)] pt-6">
         <BrandButton variant="ghost-dark" size="md" type="button" onClick={onBack}>

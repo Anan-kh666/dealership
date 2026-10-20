@@ -1,7 +1,7 @@
 import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
 import { render } from "@react-email/render";
 import { Prisma, prisma, AppStatus } from "@dealership/db";
-import { financingApplicationSubmissionSchema } from "@dealership/types";
+import { SITE, financingApplicationSubmissionSchema } from "@dealership/types";
 import { createRateLimiter } from "../../lib/rate-limit.js";
 import { financingReferenceFromId } from "../../lib/reference.js";
 import {
@@ -16,8 +16,8 @@ const submitLimiter = createRateLimiter({
   windowMs: 24 * 60 * 60 * 1000,
 });
 
-const SHOWROOM_PHONE = "+60 3 7801 2345";
-const WHATSAPP_URL = "https://wa.me/60378012345";
+const SHOWROOM_PHONE = SITE.phone.display;
+const WHATSAPP_URL = SITE.whatsappUrl;
 
 const myrFormatter = new Intl.NumberFormat("en-MY", {
   style: "currency",
